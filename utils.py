@@ -2,7 +2,7 @@ import socket
 from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic import validator
-
+import json
 
 def get_host_ip():
     """Get host IP address"""
@@ -38,3 +38,6 @@ class Account(BaseModel):
                 'recent_access_time': '2023-01-26T15:54'
             }
         }
+
+    def to_json(self):
+        return json.dumps(self.dict(), sort_keys=True)

@@ -35,6 +35,7 @@ class BankServer:
         self.router = fastapi.APIRouter()
         self.router.add_api_route('/', self.root, methods=['GET'])
         self.router.add_api_route('/balance/{client_id}', self.balance, methods=['POST'])
+        self.router.add_api_route('/print', self.printres, methods=['POST'])
         self.router.add_api_route('/Hbalance/{client_id}', self.Hbalance, methods=['POST'])
 
     def activation(self):
@@ -70,8 +71,16 @@ class BankServer:
     async def balance(self, client_id: int):
         account = [account for account in self.accounts if account.id == client_id][0]
         account.recent_access_time = get_current_time()
-        print("Client {}, Balance {}".format(client_id, account.balance))
+        for server_id, (start_id, end_id) in partition.items():
+            async with httpx.AsyncClient() as client:
+                server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
+                res = await client.post(f"{server_address}/print", json=account.to_json())
+
         return {'result': 'success'}
+
+    async def printres(self, request: fastapi.Request):
+        data = await request.json()  # Get JSON data from request
+        print(f"Received data: {data}")  # Print the received data
 
     async def Hbalance(self, client_id: int): # handle balance request from user
         """Get the balance of a client"""
@@ -82,7 +91,7 @@ class BankServer:
                     res = await client.post(f"{server_address}/balance/{client_id}")
                     return res.json()  # Return the response from the server
 
-        return {'result': 'success'}
+        return {'error': 'Client ID out of range'}
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")
