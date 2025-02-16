@@ -45,8 +45,13 @@ class User:
                 print('Exiting...')
                 self.shutdown()
                 os._exit(0)
-            elif re.match(r'(balance|bal|b)$', cmd):
-                print('Client {}, Balance {}'.format(self.id, self.balance()))
+            elif re.match(r'(balance|bal|b)\s+\d+$', cmd):
+                try:
+                    id = cmd.split()[1]
+                except ValueError:
+                    print('Invalid id command')
+                    continue
+                self.balance(id)
             else:
                 print('Invalid command')
             print()
@@ -59,12 +64,11 @@ class User:
         print('  2. exit (or quit, q)')
         print('Enter a command:')
 
-    def balance(self):
+    def balance(self, client_id):
         """Balance transaction via HTTP request"""
-        res = requests.get(self.server_addr + '/balance/{}'.format(self.id))
+        res = requests.get(self.server_addr + '/balance/{}'.format(client_id))
         assert res.status_code == 200
-        print('Client {} logic clock +1, now {}'.format(self.id, self.logic_clock))
-        return res.json()['balance']
+        print("Client {}, Balance {}".format(client_id, res.json()['balance']))
 
     def shutdown(self):
         """Shutdown the user"""

@@ -36,6 +36,10 @@ class BankServer:
         self.router.add_api_route('/balance/{client_id}', self.balance, methods=['GET'])
         self.router.add_api_route('/exit/{client_id}', self.shutdown_user, methods=['GET'])
 
+    def activation(self):
+        for i in range(100):
+            self.accounts.append(Account(id = i))
+
     def prompt(self):
         """Prompt for commands"""
         time.sleep(1)
@@ -76,9 +80,8 @@ class BankServer:
             client_id = 1
         self.accounts.append(Account(id=client_id))
         print('New client: {}, now all clients:'.format(client_id))
-        pprint(self.clients)
-        other_clients = self.clients.copy()
         self.clients.update({client_id: 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + client_id)})
+        pprint(self.clients)
 
         return {
             'client_id': client_id,
@@ -96,6 +99,7 @@ class BankServer:
 
 if __name__ == '__main__':
     server = BankServer()
+    server.activation()
     app = fastapi.FastAPI()
     app.include_router(server.router)
     threading.Thread(target=uvicorn.run, kwargs={
