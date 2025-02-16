@@ -71,12 +71,7 @@ class BankServer:
     async def balance(self, client_id: int):
         account = [account for account in self.accounts if account.id == client_id][0]
         account.recent_access_time = get_current_time()
-        for server_id, (start_id, end_id) in partition.items():
-            async with httpx.AsyncClient() as client:
-                server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
-                res = await client.post(f"{server_address}/print", json=account.to_json())
-
-        return {'result': 'success'}
+        return account.to_json()
 
     async def printres(self, request: fastapi.Request):
         data = await request.json()  # Get JSON data from request
@@ -84,14 +79,19 @@ class BankServer:
 
     async def Hbalance(self, client_id: int): # handle balance request from user
         """Get the balance of a client"""
+        respone = None
         for server_id, (start_id, end_id) in partition.items():
             if start_id <= client_id <= (end_id - 1):
                 async with httpx.AsyncClient() as client:
                     server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
                     res = await client.post(f"{server_address}/balance/{client_id}")
-                    return res.json()  # Return the response from the server
+                    response = res
+                    break
 
-        return {'error': 'Client ID out of range'}
+        for server_id in partition.keys():
+            async with httpx.AsyncClient() as client:
+                server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
+                res = await client.post(f"{server_address}/print", json=response.json())
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")
