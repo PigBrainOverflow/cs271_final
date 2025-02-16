@@ -64,9 +64,8 @@ class User:
 
     def balance(self, client_id):
         """Balance transaction via HTTP request"""
-        res = requests.get(self.server_addr + '/balance/{}'.format(client_id))
+        res = requests.post(self.server_addr + '/Hbalance/{}'.format(client_id))
         assert res.status_code == 200
-        print("Client {}, Balance {}".format(client_id, res.json()['balance']))
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()
