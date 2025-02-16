@@ -24,7 +24,6 @@ class User:
         self.id = id
         self.ipv4 = ipv4
         self.port = port
-        self.logic_clock = 0
         self.server_addr = server_addr
 
     def start(self):
@@ -43,7 +42,6 @@ class User:
             cmd = input('>>> ').strip().lower()
             if re.match(r'(exit|quit|q)$', cmd):
                 print('Exiting...')
-                self.shutdown()
                 os._exit(0)
             elif re.match(r'(balance|bal|b)\s+\d+$', cmd):
                 try:
@@ -70,29 +68,9 @@ class User:
         assert res.status_code == 200
         print("Client {}, Balance {}".format(client_id, res.json()['balance']))
 
-    def shutdown(self):
-        """Shutdown the user"""
-        # update this shutdown client info to the server
-        res = requests.get(self.server_addr + '/exit/{}'.format(self.id))
-        assert res.status_code == 200
-
-
-def registration(server_addr) -> User:
-    print('Register user on the server {}...'.format(server_addr))
-    res = requests.get(server_addr + '/register')
-    assert res.status_code == 200
-
-    # create a new client
-    info = res.json()
-    client_id = info['client_id']
-    client_addr = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + client_id)
-    server_addr = info['server_addr']
-
-    return User(client_id, CONFIG['HOST_IPv4'], port=CONFIG['HOST_PORT'] + client_id, server_addr=server_addr)
-
 if __name__ == '__main__':
     app = fastapi.FastAPI()
     server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'])
-    client = registration(server_address)
+    client = User(10, CONFIG['HOST_IPv4'], port=CONFIG['HOST_PORT'] + 10, server_addr=server_address)
     client.start()
     client.interact()

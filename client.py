@@ -32,12 +32,10 @@ class BankServer:
 
         self.router = fastapi.APIRouter()
         self.router.add_api_route('/', self.root, methods=['GET'])
-        self.router.add_api_route('/register', self.register, methods=['GET'])
         self.router.add_api_route('/balance/{client_id}', self.balance, methods=['GET'])
-        self.router.add_api_route('/exit/{client_id}', self.shutdown_user, methods=['GET'])
 
     def activation(self):
-        for i in range(100):
+        for i in range(1, 101):
             self.accounts.append(Account(id = i))
 
     def prompt(self):
@@ -70,31 +68,6 @@ class BankServer:
         account = [account for account in self.accounts if account.id == client_id][0]
         account.recent_access_time = get_current_time()
         return {'balance': account.balance}
-
-    async def register(self):
-        """Register a new client"""
-        ids = [account.id for account in self.accounts]
-        if ids:
-            client_id = max(ids) + 1
-        else:
-            client_id = 1
-        self.accounts.append(Account(id=client_id))
-        print('New client: {}, now all clients:'.format(client_id))
-        self.clients.update({client_id: 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + client_id)})
-        pprint(self.clients)
-
-        return {
-            'client_id': client_id,
-            'server_addr': f'http://{self.ipv4}:{self.port}'
-        }
-
-    async def shutdown_user(self, client_id: int):
-        """Shutdown a client"""
-        self.clients.pop(client_id)
-        self.accounts = [account for account in self.accounts if account.id != client_id]
-        print('Client {} shutdown, now all clients:'.format(client_id))
-        pprint(self.clients)
-        return {'result': 'success'}
 
 
 if __name__ == '__main__':
