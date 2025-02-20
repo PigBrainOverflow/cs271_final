@@ -11,7 +11,7 @@ import threading
 import timeloop
 from typing import List
 from datetime import timedelta
-from utils import get_current_time
+from utils import get_current_time, Transaction
 from fastapi import Body
 
 with open('config.json') as f:
@@ -25,6 +25,7 @@ class User:
         self.ipv4 = ipv4
         self.port = port
         self.server_addr = server_addr
+        self.transactions: List[Transaction] = []
 
     def start(self):
         """Start the client (FastAPI Web application)"""
@@ -50,6 +51,19 @@ class User:
                     print('Invalid id command')
                     continue
                 self.balance(id)
+            elif re.match(r'(trans|t)\s+\S+$', cmd):
+                try:
+                    file = cmd.split(maxsplit=1)[1]  # Extract file path
+                    with open(file, 'r') as file:
+                        for line in file:
+                            (x,y,amt) = tuple(map(lambda v, t: t(v.strip()), line.split(','), (int, int, float)))
+                            transaction = Transaction(x=x,y=y,amt=amt)
+                            self.transactions.append(transaction)
+                except IndexError:
+                    print("Invalid file path provided.")
+
+                for transcation in self.transactions:
+                    print(transcation.to_tuple())
             else:
                 print('Invalid command')
             print()
@@ -59,7 +73,8 @@ class User:
         time.sleep(1)
         print('Commands:')
         print('  1. balance (or bal, b)')
-        print('  2. exit (or quit, q)')
+        print('  2. transaction (or trans, t)')
+        print('  3. exit (or quit, q)')
         print('Enter a command:')
 
     def balance(self, client_id):

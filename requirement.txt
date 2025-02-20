@@ -1,0 +1,6 @@
+pip3 install timeloop
+pip3 install fastapi
+pip3 install uvicorn
+pip3 install requests
+pip3 install numpy
+pip3 install httpx

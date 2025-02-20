@@ -41,3 +41,14 @@ class Account(BaseModel):
 
     def to_json(self):
         return json.dumps(self.dict(), sort_keys=True)
+
+class Transaction(BaseModel):
+    x: int = Field(example=1)
+    y: int = Field(example=1)
+    amt: float = Field(example=1.0)
+
+    def to_json(self):
+        return json.dumps(self.__dict__, sort_keys=True)
+
+    def to_tuple(self):
+        return self.x, self.y, self.amt
