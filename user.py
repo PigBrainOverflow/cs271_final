@@ -62,8 +62,7 @@ class User:
                 except IndexError:
                     print("Invalid file path provided.")
 
-                for transcation in self.transactions:
-                    print(transcation.to_tuple())
+                self.transfer()
             else:
                 print('Invalid command')
             print()
@@ -80,6 +79,11 @@ class User:
     def balance(self, client_id):
         """Balance transaction via HTTP request"""
         res = requests.post(self.server_addr + '/Hbalance/{}'.format(client_id))
+
+    def transfer(self):
+        while self.transactions:
+            transaction = self.transactions.pop(0)
+            res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()

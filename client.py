@@ -5,7 +5,7 @@ import time
 import os
 import threading
 import logging
-from utils import get_current_time, Account
+from utils import get_current_time, Account, Transaction
 import numpy as np
 from pprint import pprint
 from typing import List
@@ -37,6 +37,8 @@ class BankServer:
         self.router.add_api_route('/balance/{client_id}', self.balance, methods=['POST'])
         self.router.add_api_route('/print', self.printres, methods=['POST'])
         self.router.add_api_route('/Hbalance/{client_id}', self.Hbalance, methods=['POST'])
+        self.router.add_api_route('/transfer', self.transfer, methods=['POST'])
+        self.router.add_api_route('/Htransfer', self.Htransfer, methods=['POST'])
 
     def activation(self):
         server_num = self.port - CONFIG['HOST_PORT']
@@ -92,6 +94,31 @@ class BankServer:
             async with httpx.AsyncClient() as client:
                 server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
                 res = await client.post(f"{server_address}/print", json=response.json())
+
+    async def Htransfer(self, trans: Transaction):
+        print(trans.model_dump())
+        x_serveraddr = None
+        y_serveraddr = None
+        for server_id, (start_id, end_id) in partition.items():
+            if start_id <= trans.x <= (end_id - 1):
+                x_serveraddr = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
+            if start_id <= trans.y <= (end_id - 1):
+                y_serveraddr = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
+
+        if not x_serveraddr or not y_serveraddr:
+            return {"error": "No matching server found for x or y"}
+
+        async with httpx.AsyncClient() as client:
+            if x_serveraddr == y_serveraddr: # intra-shard if x,y same server
+                res = await client.post(f"{x_serveraddr}/transfer", json=trans.model_dump())
+            else: # cross-shard if x,y same server
+                res = await client.post(f"{x_serveraddr}/transfer", json=trans.model_dump())
+                res = await client.post(f"{y_serveraddr}/transfer", json=trans.model_dump())
+        return {'result': 'success'}
+
+    async def transfer(self, trans: Transaction):
+        print(f"transfer incoming: {trans.model_dump()}")
+        return {'result': 'success'}
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")
