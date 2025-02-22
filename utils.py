@@ -1,54 +1,104 @@
-import socket
-from datetime import datetime
-from pydantic import BaseModel, Field
-from pydantic import validator
+import dataclasses
+import sqlite3
 import json
 
-def get_host_ip():
-    """Get host IP address"""
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
 
-    return ip
+@dataclasses.dataclass(frozen=True)
+class Endpoint:
+    ip: str
+    port: int
 
 
-def get_current_time(fmt='%Y-%m-%dT%H:%M:%S'):
-    """Get current time in specific string format"""
-    return datetime.now().strftime(fmt)
+class PersistentStorage:
+    """
+    NOTE: Log index starts from 1.
+    """
+
+    _db_conn: sqlite3.Connection
+    CREATE_CURRENT_TERM = """
+        CREATE TABLE IF NOT EXISTS current_term (
+            id INTEGER PRIMARY KEY CHECK (id = 0),
+            value INTEGER NOT NULL
+        );
+    """
+    CREATE_VOTED_FOR = """
+        CREATE TABLE IF NOT EXISTS voted_for (
+            id INTEGER PRIMARY KEY CHECK (id = 0),
+            value INTEGER
+        );
+    """
+    CREATE_LOG = """
+        CREATE TABLE IF NOT EXISTS log (
+            index INTEGER PRIMARY KEY,
+            term INTEGER,
+            command JSON,
+            committed BOOLEAN DEFAULT FALSE
+        );
+    """
+
+    def __init__(self, db_name: str):
+        self._db_conn = sqlite3.connect(db_name + ".db")
 
 
-class Account(BaseModel):
-    id: int = Field(example=1)
-    balance: float = Field(default=10.0)
-    recent_access_time: str = None
+    def create_tables(self):
+        self._db_conn.execute(self.CREATE_CURRENT_TERM)
+        self._db_conn.execute(self.CREATE_VOTED_FOR)
+        self._db_conn.execute(self.CREATE_LOG)
+        self._db_conn.commit()
 
-    @validator('recent_access_time', pre=True, always=True)
-    def set_create_time_now(cls, v):
-        return v or get_current_time()
 
-    class Config:
-        schema_extra = {
-            "example": {
-                'id': 1,
-                'balance': 10.0,
-                'recent_access_time': '2023-01-26T15:54'
-            }
-        }
+    def init_tables(self):
+        self._db_conn.execute("INSERT OR IGNORE INTO current_term (id, value) VALUES (0, 0)")
+        self._db_conn.execute("INSERT OR IGNORE INTO voted_for (id, value) VALUES (0, NULL)")
+        self._db_conn.commit()
 
-    def to_json(self):
-        return json.dumps(self.dict(), sort_keys=True)
 
-class Transaction(BaseModel):
-    x: int = Field(example=1)
-    y: int = Field(example=1)
-    amt: float = Field(example=1.0)
+    @property
+    def current_term(self) -> int:
+        cursor = self._db_conn.execute("SELECT value FROM current_term WHERE id = 0")
+        return cursor.fetchone()[0]
 
-    def to_json(self):
-        return json.dumps(self.__dict__, sort_keys=True)
 
-    def to_tuple(self):
-        return self.x, self.y, self.amt
+    @current_term.setter
+    def current_term(self, value: int):
+        self._db_conn.execute("UPDATE current_term SET value = ? WHERE id = 0", (value,))
+        self._db_conn.commit()
+
+
+    @property
+    def voted_for(self) -> int | None:
+        cursor = self._db_conn.execute("SELECT value FROM voted_for WHERE id = 0")
+        return cursor.fetchone()[0]
+
+
+    @voted_for.setter
+    def voted_for(self, value: int):
+        self._db_conn.execute("UPDATE voted_for SET value = ? WHERE id = 0", (value,))
+        self._db_conn.commit()
+
+
+    def append(self, index: int, term: int, command: dict, committed: bool = False):
+        self._db_conn.execute("INSERT INTO log (index, term, command, committed) VALUES (?, ?, ?, ?)", (index, term, json.dumps(command), committed))
+        self._db_conn.commit()
+
+
+    def __getitem__(self, index: int) -> tuple[int, dict, bool] | None:
+        cursor = self._db_conn.execute("SELECT term, command, committed FROM log WHERE index = ?", (index,))
+        row = cursor.fetchone()
+        return None if row is None else (row[0], json.loads(row[1]), row[2])
+
+
+    def __setitem__(self, index: int, term: int, command: dict, committed: bool = False):
+        self._db_conn.execute("UPDATE log SET term = ?, command = ?, committed = ? WHERE index = ?", (term, json.dumps(command), committed, index))
+        self._db_conn.commit()
+
+
+    def __len__(self) -> int:
+        cursor = self._db_conn.execute("SELECT COUNT(*) FROM log")
+        return cursor.fetchone()[0]
+
+
+    def remove_back(self, index: int):
+        # remove all logs with index >= index
+        self._db_conn.execute("DELETE FROM log WHERE index >= ?", (index,))
+        self._db_conn.commit()

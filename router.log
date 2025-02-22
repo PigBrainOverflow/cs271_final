@@ -1,0 +1,5 @@
+2025-02-17 06:48:37,403 [INFO] Listening on Endpoint(ip='127.0.0.1', port=8080)
+2025-02-17 06:49:02,639 [INFO] Connection from Endpoint(ip='127.0.0.1', port=8081)
+2025-02-17 06:49:02,639 [INFO] Received b'{"command": "terminate"}\n' from user
+2025-02-17 06:49:02,639 [INFO] Terminating server
+2025-02-17 06:49:02,639 [INFO] Server closed successfully

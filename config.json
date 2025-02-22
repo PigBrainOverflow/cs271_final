@@ -1,4 +1,10 @@
 {
-    "HOST_IPv4": "localhost",
-    "HOST_PORT": 8000
+    "router": {
+        "ip": "127.0.0.1",
+        "port": 8080
+    },
+    "user": {
+        "ip": "127.0.0.1",
+        "port": 8081
+    }
 }
