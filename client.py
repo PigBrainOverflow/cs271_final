@@ -3,7 +3,6 @@ import json
 import uvicorn
 import time
 import os
-import threading
 import logging
 from utils import get_current_time, Account, Transaction
 import numpy as np
@@ -17,7 +16,7 @@ with open('config.json') as f:
 
 partition = {1: (1, 1001), 2: (1001, 2001), 3: (2001, 3001)}
 
-class BankServer:
+class BankClient:
     """Bank server"""
     __instance = None  # Singleton pattern
 
@@ -33,55 +32,13 @@ class BankServer:
         self.port = CONFIG['HOST_PORT']
 
         self.router = fastapi.APIRouter()
-        self.router.add_api_route('/', self.root, methods=['GET'])
-        self.router.add_api_route('/balance/{client_id}', self.balance, methods=['POST'])
-        self.router.add_api_route('/print', self.printres, methods=['POST'])
         self.router.add_api_route('/Hbalance/{client_id}', self.Hbalance, methods=['POST'])
-        self.router.add_api_route('/transfer', self.transfer, methods=['POST'])
         self.router.add_api_route('/Htransfer', self.Htransfer, methods=['POST'])
 
-    def activation(self):
-        server_num = self.port - CONFIG['HOST_PORT']
-        if (server_num) in partition:
-            self.accounts.extend(Account(id=i) for i in range(*partition[server_num]))
-
-    def prompt(self):
-        """Prompt for commands"""
-        time.sleep(1)
-        print('Welcome to the blockchain bank server!')
-        print('Commands:')
-        print('  1. exit (or quit, q)')
-        print('Enter a command:')
-
-    def interact(self):
-        """Interact with the server"""
-        while True:
-            cmd = input('>>> ').strip()
-            if cmd in ['exit', 'quit', 'q']:
-                print('Exiting...')
-                os._exit(0)
-            elif cmd == 'clients':
-                print(self.clients)
-            else:
-                print('Invalid command')
-            print()
-
     # for fastapi route part
-    async def root(self):
-        return {'message': 'Welcome to the blockchain bank server!'}
-
-    async def balance(self, client_id: int):
-        account = [account for account in self.accounts if account.id == client_id][0]
-        account.recent_access_time = get_current_time()
-        return account.to_json()
-
-    async def printres(self, request: fastapi.Request):
-        data = await request.json()  # Get JSON data from request
-        print(f"Received data: {data}")  # Print the received data
-
     async def Hbalance(self, client_id: int): # handle balance request from user
         """Get the balance of a client"""
-        respone = None
+        response = None
         for server_id, (start_id, end_id) in partition.items():
             if start_id <= client_id <= (end_id - 1):
                 async with httpx.AsyncClient() as client:
@@ -116,28 +73,21 @@ class BankServer:
                 res = await client.post(f"{y_serveraddr}/transfer", json=trans.model_dump())
         return {'result': 'success'}
 
-    async def transfer(self, trans: Transaction):
-        print(f"transfer incoming: {trans.model_dump()}")
-        return {'result': 'success'}
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")
     parser.add_argument("-p", "--port", type=int, required=True, help="Port number to connect to")
     args = parser.parse_args()
 
-    server = BankServer()
+    server = BankClient()
     server.port = args.port + CONFIG['HOST_PORT']
     print(f"server port {server.port}")
 
-    server.activation()
     app = fastapi.FastAPI()
     app.include_router(server.router)
-    threading.Thread(target=uvicorn.run, kwargs={
-        'app': app,
-        'host': server.ipv4,
-        'port': server.port,
-        'log_level': 'warning'
-    }).start()
 
-    server.prompt()
-    server.interact()
+    uvicorn.run(
+        app,
+        host=server.ipv4,
+        port=server.port,
+        log_level='warning'
+    )

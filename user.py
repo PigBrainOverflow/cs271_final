@@ -13,6 +13,7 @@ from typing import List
 from datetime import timedelta
 from utils import get_current_time, Transaction
 from fastapi import Body
+import subprocess
 
 with open('config.json') as f:
     CONFIG = json.load(f)
@@ -43,6 +44,7 @@ class User:
             cmd = input('>>> ').strip().lower()
             if re.match(r'(exit|quit|q)$', cmd):
                 print('Exiting...')
+                process.terminate()
                 os._exit(0)
             elif re.match(r'(balance|bal|b)\s+\d+$', cmd):
                 try:
@@ -87,7 +89,12 @@ class User:
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()
-    server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'])
+    process = subprocess.Popen(
+        ["python", "client.py", "-p", "11"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + 11)
     client = User(10, CONFIG['HOST_IPv4'], port=CONFIG['HOST_PORT'] + 10, server_addr=server_address)
     client.start()
     client.interact()
