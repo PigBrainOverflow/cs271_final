@@ -27,6 +27,11 @@ class User:
         self.port = port
         self.server_addr = server_addr
         self.transactions: List[Transaction] = []
+        self.command = {
+            "b": self.balance,
+            "t": self.transfer,
+            "q": self.exit
+        }
 
     def start(self):
         """Start the client (FastAPI Web application)"""
@@ -42,47 +47,43 @@ class User:
         self.prompt()
         while True:
             cmd = input('>>> ').strip().lower()
-            if re.match(r'(exit|quit|q)$', cmd):
-                print('Exiting...')
-                process.terminate()
-                os._exit(0)
-            elif re.match(r'(balance|bal|b)\s+\d+$', cmd):
-                try:
-                    id = cmd.split()[1]
-                except ValueError:
-                    print('Invalid id command')
-                    continue
-                self.balance(id)
-            elif re.match(r'(trans|t)\s+\S+$', cmd):
-                try:
-                    file = cmd.split(maxsplit=1)[1]  # Extract file path
-                    with open(file, 'r') as file:
-                        for line in file:
-                            (x,y,amt) = tuple(map(lambda v, t: t(v.strip()), line.split(','), (int, int, float)))
-                            transaction = Transaction(x=x,y=y,amt=amt)
-                            self.transactions.append(transaction)
-                except IndexError:
-                    print("Invalid file path provided.")
-
-                self.transfer()
-            else:
-                print('Invalid command')
+            try:
+                parts = cmd.split(maxsplit=1)  # Split into command and rest
+                func = parts[0]  # First word is the command
+                arg = parts[1] if len(parts) > 1 else None  # Argument is optional
+                self.command[func](arg)
+            except IndexError:
+                print("Error: wrong command")
             print()
 
     def prompt(self):
         """Prompt the user for input"""
         time.sleep(1)
-        print('Commands:')
-        print('  1. balance (or bal, b)')
-        print('  2. transaction (or trans, t)')
-        print('  3. exit (or quit, q)')
+        print('Command: Usage')
+        print('  1. balance: b <item-id>')
+        print('  2. transfer: t <file path>')
+        print('  3. exit: q')
         print('Enter a command:')
+
+    def exit(self, arg=None):
+        print('Exiting...')
+        process.terminate()
+        os._exit(0)
 
     def balance(self, client_id):
         """Balance transaction via HTTP request"""
         res = requests.post(self.server_addr + '/Hbalance/{}'.format(client_id))
 
-    def transfer(self):
+    def transfer(self, file):
+        try:
+            with open(file, 'r') as file:
+                for line in file:
+                    (x,y,amt) = tuple(map(lambda v, t: t(v.strip()), line.split(','), (int, int, float)))
+                    transaction = Transaction(x=x,y=y,amt=amt)
+                    self.transactions.append(transaction)
+        except IndexError:
+            print("Invalid file path provided.")
+
         while self.transactions:
             transaction = self.transactions.pop(0)
             res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
