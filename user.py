@@ -30,6 +30,8 @@ class User:
         self.command = {
             "b": self.balance,
             "t": self.transfer,
+            "tl": self.txnlog,
+            "p": self.profiling,
             "q": self.exit
         }
 
@@ -87,6 +89,27 @@ class User:
         while self.transactions:
             transaction = self.transactions.pop(0)
             res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+
+    def txnlog(self, arg=None):
+        res = requests.post(self.server_addr + '/Htxnlog')
+
+    def profiling(self, file):
+        try:
+            with open(file, 'r') as file:
+                for line in file:
+                    (x,y,amt) = tuple(map(lambda v, t: t(v.strip()), line.split(','), (int, int, float)))
+                    transaction = Transaction(x=x,y=y,amt=amt)
+                    self.transactions.append(transaction)
+        except IndexError:
+            print("Invalid file path provided.")
+
+        total_transaction = len(self.transactions)
+        start = time.perf_counter()
+        while self.transactions:
+            transaction = self.transactions.pop(0)
+            res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+        end = time.perf_counter()
+        print(f"Throughput: {total_transaction/(end - start)}")
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()
