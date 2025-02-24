@@ -14,6 +14,8 @@ from datetime import timedelta
 from utils import get_current_time, Transaction
 from fastapi import Body
 import subprocess
+import asyncio
+import httpx
 
 with open('config.json') as f:
     CONFIG = json.load(f)
@@ -86,9 +88,7 @@ class User:
         except IndexError:
             print("Invalid file path provided.")
 
-        while self.transactions:
-            transaction = self.transactions.pop(0)
-            res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+        asyncio.run(self.process_trans())
 
     def txnlog(self, arg=None):
         res = requests.post(self.server_addr + '/Htxnlog')
@@ -105,11 +105,42 @@ class User:
 
         total_transaction = len(self.transactions)
         start = time.perf_counter()
-        while self.transactions:
-            transaction = self.transactions.pop(0)
-            res = requests.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+        results = asyncio.run(self.process_trans(prof=True))
         end = time.perf_counter()
         print(f"Throughput: {total_transaction/(end - start)}")
+        print(f"Latency:")
+        for result in results:
+                print(f"    {result:.3f} seconds")
+
+    async def process_single_trans(self, client: httpx.AsyncClient, transaction: Transaction):
+        start_time = time.perf_counter()
+        response = await client.post(
+            self.server_addr + '/Htransfer',
+            json=transaction.model_dump()
+        )
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        return elapsed_time
+
+    async def process_trans(self,prof=False):
+        async with httpx.AsyncClient() as client:
+            # Create tasks for all transactions
+            if prof == False:
+                tasks = [
+                    client.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+                    for transaction in self.transactions
+                ]
+                await asyncio.gather(*tasks)
+                self.transactions.clear()
+                return None
+            else:
+                tasks = [
+                    self.process_single_trans(client, transaction)
+                    for transaction in self.transactions
+                ]
+                results = await asyncio.gather(*tasks)
+                self.transactions.clear()
+                return results
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()
