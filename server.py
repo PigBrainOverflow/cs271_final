@@ -73,6 +73,7 @@ class BankServer:
     async def balance(self, client_id: int):
         account = [account for account in self.accounts if account.id == client_id][0]
         account.recent_access_time = get_current_time()
+        print(f"\n{account}")
         return account.to_json()
 
     async def printres(self, request: fastapi.Request):

@@ -31,14 +31,11 @@ class Account(BaseModel):
     def set_create_time_now(cls, v):
         return v or get_current_time()
 
-    class Config:
-        schema_extra = {
-            "example": {
-                'id': 1,
-                'balance': 10.0,
-                'recent_access_time': '2023-01-26T15:54'
-            }
-        }
+    def __str__(self):
+        table_header = f"| {'Client':^7} | {'BAL':^7} | {'Timestamp':^30} |"
+        table_divider = "-" * len(table_header)
+        table_row = f"| {self.id:^7} | {self.balance:^7.2f} | {self.recent_access_time:^30} |"
+        return f"{table_divider}\n{table_header}\n{table_divider}\n{table_row}\n{table_divider}"
 
     def to_json(self):
         return json.dumps(self.dict(), sort_keys=True)

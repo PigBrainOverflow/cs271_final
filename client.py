@@ -38,20 +38,11 @@ class BankClient:
 
     # for fastapi route part
     async def Hbalance(self, client_id: int): # handle balance request from user
-        """Get the balance of a client"""
-        response = None
         for server_id, (start_id, end_id) in partition.items():
             if start_id <= client_id <= (end_id - 1):
                 async with httpx.AsyncClient() as client:
                     server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
-                    res = await client.post(f"{server_address}/balance/{client_id}")
-                    response = res
-                    break
-
-        for server_id in partition.keys():
-            async with httpx.AsyncClient() as client:
-                server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
-                res = await client.post(f"{server_address}/print", json=response.json())
+                    await client.post(f"{server_address}/balance/{client_id}")
 
     async def Htxnlog(self):
         for server_id, (start_id, end_id) in partition.items():
