@@ -16,6 +16,7 @@ from fastapi import Body
 import subprocess
 import asyncio
 import httpx
+import random
 
 with open('config.json') as f:
     CONFIG = json.load(f)
@@ -71,12 +72,13 @@ class User:
 
     def exit(self, arg=None):
         print('Exiting...')
-        process.terminate()
+        for process in processes:
+            process.terminate()
         os._exit(0)
 
     def balance(self, client_id):
         """Balance transaction via HTTP request"""
-        res = requests.post(self.server_addr + '/Hbalance/{}'.format(client_id))
+        res = requests.post(random.choice(self.server_addr) + '/Hbalance/{}'.format(client_id))
 
     def transfer(self, file):
         try:
@@ -91,7 +93,7 @@ class User:
         asyncio.run(self.process_trans())
 
     def txnlog(self, arg=None):
-        res = requests.post(self.server_addr + '/Htxnlog')
+        res = requests.post(random.choice(self.server_addr) + '/Htxnlog')
 
     def profiling(self, file):
         try:
@@ -112,10 +114,11 @@ class User:
         for result in results:
                 print(f"    {result:.3f} seconds")
 
-    async def process_single_trans(self, client: httpx.AsyncClient, transaction: Transaction):
+    async def process_single_trans(self, client: httpx.AsyncClient, transaction: Transaction, server_idx: int):
+        addr = self.server_addr[server_idx % len(self.server_addr)]
         start_time = time.perf_counter()
         response = await client.post(
-            self.server_addr + '/Htransfer',
+            addr + '/Htransfer',
             json=transaction.model_dump()
         )
         end_time = time.perf_counter()
@@ -127,7 +130,7 @@ class User:
             # Create tasks for all transactions
             if prof == False:
                 tasks = [
-                    client.post(self.server_addr + '/Htransfer', json=transaction.model_dump())
+                    client.post(random.choice(self.server_addr) + '/Htransfer', json=transaction.model_dump())
                     for transaction in self.transactions
                 ]
                 await asyncio.gather(*tasks)
@@ -135,8 +138,8 @@ class User:
                 return None
             else:
                 tasks = [
-                    self.process_single_trans(client, transaction)
-                    for transaction in self.transactions
+                    self.process_single_trans(client, transaction, idx)
+                    for idx, transaction in enumerate(self.transactions)
                 ]
                 results = await asyncio.gather(*tasks)
                 self.transactions.clear()
@@ -144,12 +147,21 @@ class User:
 
 if __name__ == '__main__':
     app = fastapi.FastAPI()
-    process = subprocess.Popen(
-        ["python", "client.py", "-p", "11"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + 11)
+
+    processes = []
+    for i in range(11, 15):
+        process = subprocess.Popen(
+            ["python", "client.py", "-p", str(i)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        processes.append(process)
+
+    server_address = [
+        'http://{}:{}'.format(CONFIG['HOST_IPv4'], CONFIG['HOST_PORT'] + i)
+        for i in range(11, 15)
+    ]
+
     client = User(10, CONFIG['HOST_IPv4'], port=CONFIG['HOST_PORT'] + 10, server_addr=server_address)
     client.start()
     client.interact()
