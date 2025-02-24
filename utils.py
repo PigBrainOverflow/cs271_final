@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic import validator
 import json
+from colorama import Fore, Style
 
 def get_host_ip():
     """Get host IP address"""
@@ -52,3 +53,9 @@ class Transaction(BaseModel):
 
     def to_tuple(self):
         return self.x, self.y, self.amt
+
+class TxnLog(Transaction):
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+    def __str__(self):
+        return f"{Fore.YELLOW}<<<{self.timestamp}>>>{Style.RESET_ALL} Transaction from {Fore.GREEN}{str(self.x)}{Style.RESET_ALL} to {Fore.GREEN}{str(self.y)}{Style.RESET_ALL} of amount {Fore.GREEN}{str(self.amt)}{Style.RESET_ALL}"

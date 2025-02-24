@@ -33,6 +33,7 @@ class BankClient:
 
         self.router = fastapi.APIRouter()
         self.router.add_api_route('/Hbalance/{client_id}', self.Hbalance, methods=['POST'])
+        self.router.add_api_route('/Htxnlog', self.Htxnlog, methods=['POST'])
         self.router.add_api_route('/Htransfer', self.Htransfer, methods=['POST'])
 
     # for fastapi route part
@@ -51,6 +52,12 @@ class BankClient:
             async with httpx.AsyncClient() as client:
                 server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
                 res = await client.post(f"{server_address}/print", json=response.json())
+
+    async def Htxnlog(self):
+        for server_id, (start_id, end_id) in partition.items():
+            async with httpx.AsyncClient() as client:
+                server_address = 'http://{}:{}'.format(CONFIG['HOST_IPv4'], 8000 + server_id)
+                res = await client.post(f"{server_address}/txnlog")
 
     async def Htransfer(self, trans: Transaction):
         print(trans.model_dump())

@@ -5,7 +5,7 @@ import time
 import os
 import threading
 import logging
-from utils import get_current_time, Account, Transaction
+from utils import get_current_time, Account, Transaction, TxnLog
 import numpy as np
 from pprint import pprint
 from typing import List
@@ -28,6 +28,7 @@ class BankServer:
 
     def __init__(self) -> None:
         self.accounts: List[Account] = []  # Account information for clients
+        self.records: List[TxnLog] = []
         self.clients = {}  # Client addresses: {id1: addr1, id2: addr2, ...}
         self.ipv4 = CONFIG['HOST_IPv4']
         self.port = CONFIG['HOST_PORT']
@@ -37,6 +38,7 @@ class BankServer:
         self.router.add_api_route('/balance/{client_id}', self.balance, methods=['POST'])
         self.router.add_api_route('/print', self.printres, methods=['POST'])
         self.router.add_api_route('/transfer', self.transfer, methods=['POST'])
+        self.router.add_api_route('/txnlog', self.txnlog, methods=['POST'])
 
     def activation(self):
         server_num = self.port - CONFIG['HOST_PORT']
@@ -78,8 +80,13 @@ class BankServer:
         print(f"Received data: {data}")  # Print the received data
 
     async def transfer(self, trans: Transaction):
-        print(f"transfer incoming: {trans.model_dump()}")
+        self.records.append(TxnLog(**trans.model_dump()))
         return {'result': 'success'}
+
+    async def txnlog(self):
+        print("Transcation record:")
+        for record in self.records:
+            print(f"    {record}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")
