@@ -22,6 +22,7 @@ class Server:
     # Raft-related constants
     _ELECTION_TIMEOUT_MIN: int = 150    # milliseconds
     _ELECTION_TIMEOUT_MAX: int = 300
+    _HEARTBEAT_INTERVAL: int = 50
 
     # Raft-related peresistent states
     _storage: PersistentStorage

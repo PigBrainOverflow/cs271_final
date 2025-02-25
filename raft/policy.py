@@ -16,6 +16,10 @@ class Policy:
         self._server = _server  # does not own it
 
 
+    def commit(self):
+        raise NotImplementedError
+
+
     async def handle_event(self, message: dict) -> Policy:
         raise NotImplementedError
 
@@ -53,10 +57,6 @@ class GeneralPolicy(Policy):
         self._election_timeout_task = asyncio.create_task(self._handle_election_timeout())
 
 
-    def commit(self):
-        raise NotImplementedError
-
-
 class LeaderPolicy(Policy):
     """
     1. Upon election: send initial empty AppendEntries RPCs (heartbeat) to each server; repeat during idle periods to prevent election timeouts;
@@ -68,9 +68,38 @@ class LeaderPolicy(Policy):
     """
 
     _name: str = "Leader"
+    _heartbeat_task: asyncio.Task | None
+    _next_indices: dict[int, int]   # next index to send to each follower
+    _match_indices: dict[int, int]  # highest index replicated to each follower
+
+    async def broadcast_append_entries(self, entries: list[dict] | None = None):
+        for ep in self._server._peer_eps.values():
+            request = {
+                "to": ep.to_dict(),
+                "content": {
+                    "type": "AppendEntriesRPC",
+                    "term": self._server._storage.current_term,
+                    "leader_id": self._server._index,
+                    "prev_log_index": len(self._server._storage),
+                    "prev_log_term": self._server._storage[len(self._server._storage)][0] if len(self._server._storage) > 0 else 0,
+                    "entries": [] if entries is None else entries,
+                    "leader_commit": self._server._commit_index
+                }
+            }
+            self._server._writer.write(json.dumps(request).encode() + b"\n")
+            self._server._logger.info(f"Sent {request} to {ep.to_dict()}")
+        await self._server._writer.drain()
+
 
     def __init__(self, _server: Server):
         super().__init__(_server)
+        self._next_indices = {index: len(_server._storage) + 1 for index in _server._peer_eps}
+        self._match_indices = {index: 0 for index in _server._peer_eps}
+        self._heartbeat_task = None
+
+
+    async def handle_event(self, message: dict) -> Policy:
+        type = message["content"]["type"]
 
 
 class FollowerPolicy(GeneralPolicy):
@@ -288,7 +317,9 @@ class CandidatePolicy(GeneralPolicy):
             self._votes.add(content["voter_id"])
             if len(self._votes) + 1 > (len(self._server._peer_eps) + 1) // 2:
                 # convert to leader
-                return LeaderPolicy(self._server)
+                leader = LeaderPolicy(self._server)
+                await leader.broadcast_append_entries()   # send initial heartbeat
+                return leader
         return self
 
 
@@ -330,7 +361,7 @@ class CandidatePolicy(GeneralPolicy):
         await self._server._writer.drain()
 
 
-    async def handle_event(self, message) -> Policy:
+    async def handle_event(self, message: dict) -> Policy:
         type = message["content"]["type"]
         if type == "AppendEntriesRPC":
             # convert to follower
