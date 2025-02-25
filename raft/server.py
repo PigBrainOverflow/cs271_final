@@ -2,11 +2,8 @@ import asyncio
 import logging
 import json
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from .policy import *
-
-from ..utils import Endpoint, PersistentStorage
+from .policy import Policy, FollowerPolicy
+from utils import Endpoint, PersistentStorage
 
 
 class Server:
@@ -14,7 +11,7 @@ class Server:
     _index: int
     _self_ep: Endpoint
     _router_ep: Endpoint
-    _peer_eps: dict[int, Endpoint]  # peer index -> endpoint
+    _peer_eps: dict[int, Endpoint]  # peer index -> endpoint, excluding itself
     _reader: asyncio.StreamReader
     _writer: asyncio.StreamWriter
     _queue: asyncio.Queue[dict]
@@ -74,16 +71,20 @@ class Server:
         # read from the queue and handle the message
         while True:
             msg = await self._queue.get()
-            self._logger.info(f"Handling message {msg}")
+            self._logger.info(f"Handling event {msg}")
             self._policy = await self._policy.handle_event(msg)
 
 
     async def async_start(self):
         self._storage = PersistentStorage(f"server{self._index}")
+        # start as a follower
         self._policy = FollowerPolicy(self)
         await self._connect_to_router()
         _, pending = await asyncio.wait(
-            [self._read_from_router(), self._read_from_queue()],
+            [
+                asyncio.create_task(self._read_from_router()),
+                asyncio.create_task(self._read_from_queue())
+            ],
             return_when=asyncio.FIRST_COMPLETED  # stop when any task completes
         )
         for task in pending:

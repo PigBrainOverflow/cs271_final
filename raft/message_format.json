@@ -34,5 +34,22 @@
         "term": 1,
         "vote_granted": true,
         "voter_id": 1
+    },
+    {
+        "type": "ClientRequest",
+        "serial_number": 1,
+        "command": {}
+    },
+    {
+        "type": "ClientResponse",
+        "serial_number": 1,
+        "leader_id": 1
+    },
+    {
+        "type": "ClientResponse",
+        "serial_number": 1,
+        "response": [
+            {}
+        ]
     }
 ]
