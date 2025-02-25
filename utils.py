@@ -105,3 +105,8 @@ class PersistentStorage:
         # remove all logs with index >= index
         self._db_conn.execute("DELETE FROM log WHERE index_ >= ?", (index,))
         self._db_conn.commit()
+
+
+    def set_result(self, index: int, result: dict):
+        self._db_conn.execute("UPDATE log SET result = ? WHERE index_ = ?", (json.dumps(result), index))
+        self._db_conn.commit()
