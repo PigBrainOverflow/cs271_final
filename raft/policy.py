@@ -256,6 +256,20 @@ class LeaderPolicy(Policy):
         return self
 
 
+    async def _handle_client_request(self, message: dict):
+        # append the command to the local log
+        receive_from, content = message["from"], message["content"]
+        command_in_log = {
+            "ip": receive_from["ip"],   # client endpoint
+            "port": receive_from["port"],
+            "serial_number": content["serial_number"],
+            "content": content["command"]
+        }
+        self._server._storage.append(len(self._server._storage) + 1, self._server._storage.current_term, command_in_log)
+        # no need to send response here
+        # it's handled by the heartbeat
+
+
     async def handle_event(self, message: dict) -> Policy:
         type = message["content"]["type"]
         if type == "AppendEntriesRPC":
@@ -267,8 +281,11 @@ class LeaderPolicy(Policy):
         elif type == "Heartbeat":
             await self.broadcast_append_entries(self._server._MAX_ENTRIES_PER_APPEND_ENTRIES)
             return self
+        elif type == "ClientRequest":
+            await self._handle_client_request(message)
+            return self
         else:
-            # TODO: handle client request
+            # ignore other messages
             return self
 
 
