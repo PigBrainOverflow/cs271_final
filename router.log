@@ -1,5 +1,290 @@
-2025-02-17 06:48:37,403 [INFO] Listening on Endpoint(ip='127.0.0.1', port=8080)
-2025-02-17 06:49:02,639 [INFO] Connection from Endpoint(ip='127.0.0.1', port=8081)
-2025-02-17 06:49:02,639 [INFO] Received b'{"command": "terminate"}\n' from user
-2025-02-17 06:49:02,639 [INFO] Terminating server
-2025-02-17 06:49:02,639 [INFO] Server closed successfully
+2025-02-24 17:28:06,245 [INFO] Listening on Endpoint(ip='127.0.0.1', port=8080)
+2025-02-24 17:28:23,642 [INFO] Connection from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:28:23,848 [INFO] Connection from Endpoint(ip='127.0.0.1', port=9000) closed by peer
+2025-02-24 17:29:08,200 [INFO] Connection from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,410 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 2, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,410 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:08,411 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 2, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,411 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:08,631 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 3, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,631 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:08,631 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 3, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,632 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:08,930 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 4, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,930 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:08,930 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 4, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:08,930 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,225 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 5, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,225 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,225 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 5, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,225 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,392 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 6, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,393 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,393 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 6, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,394 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,598 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 7, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,598 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,600 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 7, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,600 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,878 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 8, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,878 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:09,880 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 8, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:09,880 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,178 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 9, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,178 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,178 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 9, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,180 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,348 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 10, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,348 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,348 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 10, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,350 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,541 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 11, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,542 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,542 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 11, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,543 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,716 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 12, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,716 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,717 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 12, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,718 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,971 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 13, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,972 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:10,972 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 13, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:10,973 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,178 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 14, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,178 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,180 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 14, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,180 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,500 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 15, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,500 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,500 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 15, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,502 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,678 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 16, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,678 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,678 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 16, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,680 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,897 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 17, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,897 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:11,898 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 17, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:11,898 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,094 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 18, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,095 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,095 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 18, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,096 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,300 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 19, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,300 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,300 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 19, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,301 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,556 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 20, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,556 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,557 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 20, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,557 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,776 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 21, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,776 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:12,779 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 21, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:12,780 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,062 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 22, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,062 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,063 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 22, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,063 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,234 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 23, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,235 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,236 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 23, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,236 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,510 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 24, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,510 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,510 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 24, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,511 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,810 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 25, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,810 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:13,811 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 25, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:13,811 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,055 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 26, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,060 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,060 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 26, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,060 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,263 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 27, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,264 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,264 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 27, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,265 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,487 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 28, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,487 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,488 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 28, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,488 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,724 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 29, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,725 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:14,725 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 29, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:14,726 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,001 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 30, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,001 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,002 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 30, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,003 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,195 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 31, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,196 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,196 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 31, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,197 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,487 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 32, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,487 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,488 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 32, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,488 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,778 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 33, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,778 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:15,778 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 33, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:15,780 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,043 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 34, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,044 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,044 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 34, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,045 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,352 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 35, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,352 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,353 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 35, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,353 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,668 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 36, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,668 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,669 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 36, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,669 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,932 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 37, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,932 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:16,933 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 37, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:16,933 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,194 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 38, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,194 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,194 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 38, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,194 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,460 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 39, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,460 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,463 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 39, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,463 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,742 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 40, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,742 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,743 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 40, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,743 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,997 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 41, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,997 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:17,998 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 41, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:17,998 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,294 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 42, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,294 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,295 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 42, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,295 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,547 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 43, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,547 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,548 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 43, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,548 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,746 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 44, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,746 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:18,748 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 44, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:18,748 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,012 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 45, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,012 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,013 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 45, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,013 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,273 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 46, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,274 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,274 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 46, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,275 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,451 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 47, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,451 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,452 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 47, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,452 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,724 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 48, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,724 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,725 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 48, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,725 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,986 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 49, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,987 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:19,987 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 49, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:19,987 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,213 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 50, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,214 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,215 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 50, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,215 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,478 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 51, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,479 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,479 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 51, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,479 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,760 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 52, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,761 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,762 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 52, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,762 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,955 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 53, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,955 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:20,960 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 53, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:20,960 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,214 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 54, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,215 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,216 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 54, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,216 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,510 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 55, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,511 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,511 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 55, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,512 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,728 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 56, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,729 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,730 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 56, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,730 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,915 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 57, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,916 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:21,916 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 57, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:21,917 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,202 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 58, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,202 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,202 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 58, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,203 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,360 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 59, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,360 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,360 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 59, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,360 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,660 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 60, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,660 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,660 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 60, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,661 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,947 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 61, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,948 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:22,948 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 61, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:22,948 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,203 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 62, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,203 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,204 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 62, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,204 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,374 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 63, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,375 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,376 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 63, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,376 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,562 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 64, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,563 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,563 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 64, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,563 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,734 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 65, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,734 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,735 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 65, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,735 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,924 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 66, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,925 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:23,925 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 66, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:23,926 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,131 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 67, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,131 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,131 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 67, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,132 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,360 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 68, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,360 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,360 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 68, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,361 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,657 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 69, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,657 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,658 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 69, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,658 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,841 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 70, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,842 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:24,842 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 70, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:24,843 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:25,067 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 71, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:25,068 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:25,068 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 71, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:25,069 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:25,278 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9001}, "content": {"type": "RequestVoteRPC", "term": 72, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:25,278 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:25,278 [INFO] Received b'{"to": {"ip": "127.0.0.1", "port": 9002}, "content": {"type": "RequestVoteRPC", "term": 72, "candidate_id": 1, "last_log_index": 0, "last_log_term": 0}}\n' from Endpoint(ip='127.0.0.1', port=9000)
+2025-02-24 17:29:25,279 [ERROR] Connection to Endpoint(ip='ip', port='port') not found
+2025-02-24 17:29:25,440 [INFO] Connection from Endpoint(ip='127.0.0.1', port=9000) closed by peer
+2025-02-24 17:29:29,204 [INFO] Server closed successfully

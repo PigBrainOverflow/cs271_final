@@ -48,3 +48,4 @@ if __name__ == "__main__":
         peer_eps=peer_eps,
         logger=logger
     )
+    server.start()

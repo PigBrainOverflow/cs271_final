@@ -234,7 +234,7 @@ class CandidatePolicy(GeneralPolicy):
     _name: str = "Candidate"
     _votes: set[int]    # set of servers that voted for this candidate
 
-    async def _broadcast_request_vote(self):
+    async def broadcast_request_vote(self):
         last_log_index = len(self._server._storage)
         request_content = {
             "type": "RequestVoteRPC",
@@ -342,7 +342,7 @@ class CandidatePolicy(GeneralPolicy):
         elif type == "ElectionTimeout":
             # start a new election and vote for self
             self._init()
-            await self._broadcast_request_vote()
+            await self.broadcast_request_vote()
             return self
         elif type == "RequestVoteRPC":
             return await self._handle_request_vote(message)

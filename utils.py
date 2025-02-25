@@ -8,6 +8,9 @@ class Endpoint:
     ip: str
     port: int
 
+    def to_dict(self) -> dict:
+        return dataclasses.asdict(self)
+
 
 class PersistentStorage:
     """
@@ -29,7 +32,7 @@ class PersistentStorage:
     """
     CREATE_LOG = """
         CREATE TABLE IF NOT EXISTS log (
-            index INTEGER PRIMARY KEY,
+            index_ INTEGER PRIMARY KEY,
             term INTEGER,
             command JSON,
             committed BOOLEAN DEFAULT FALSE
@@ -78,18 +81,18 @@ class PersistentStorage:
 
 
     def append(self, index: int, term: int, command: dict, committed: bool = False):
-        self._db_conn.execute("INSERT INTO log (index, term, command, committed) VALUES (?, ?, ?, ?)", (index, term, json.dumps(command), committed))
+        self._db_conn.execute("INSERT INTO log (index_, term, command, committed) VALUES (?, ?, ?, ?)", (index, term, json.dumps(command), committed))
         self._db_conn.commit()
 
 
     def __getitem__(self, index: int) -> tuple[int, dict, bool] | None:
-        cursor = self._db_conn.execute("SELECT term, command, committed FROM log WHERE index = ?", (index,))
+        cursor = self._db_conn.execute("SELECT term, command, committed FROM log WHERE index_ = ?", (index,))
         row = cursor.fetchone()
         return None if row is None else (row[0], json.loads(row[1]), row[2])
 
 
     def __setitem__(self, index: int, term: int, command: dict, committed: bool = False):
-        self._db_conn.execute("UPDATE log SET term = ?, command = ?, committed = ? WHERE index = ?", (term, json.dumps(command), committed, index))
+        self._db_conn.execute("UPDATE log SET term = ?, command = ?, committed = ? WHERE index_ = ?", (term, json.dumps(command), committed, index))
         self._db_conn.commit()
 
 
@@ -100,5 +103,5 @@ class PersistentStorage:
 
     def remove_back(self, index: int):
         # remove all logs with index >= index
-        self._db_conn.execute("DELETE FROM log WHERE index >= ?", (index,))
+        self._db_conn.execute("DELETE FROM log WHERE index_ >= ?", (index,))
         self._db_conn.commit()
