@@ -20,7 +20,8 @@
     {
         "type": "AppendEntriesResponse",
         "term": 1,
-        "success": true
+        "success": true,
+        "last_index": 1
     },
     {
         "type": "RequestVoteRPC",

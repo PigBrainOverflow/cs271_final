@@ -16,7 +16,10 @@ class Policy:
         self._server = _server  # does not own it
 
 
-    def commit(self):
+    def commit(self, old_commit_index: int, is_leader: bool):
+        # commit from old_commit_index + 1 to self._server._commit_index
+        # 1. Apply log entries to state machine
+        # 2. If leader, send response to client
         raise NotImplementedError
 
 
@@ -101,6 +104,8 @@ class LeaderPolicy(Policy):
     4. If successful: update nextIndex and matchIndex for follower;
     5. If AppendEntries fails because of log inconsistency: decrement nextIndex and retry;
     6. If there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N, and log[N].term == currentTerm: set commitIndex = N.
+
+    This implementation uses a timed loop to send AppendEntries RPCs for both heartbeats and log replication. Client requests append entries to the log, and the loop ensures synchronization by sending all unreplicated entries. If no new entries exist, a heartbeat (empty entry) is sent.
     """
 
     _name: str = "Leader"
@@ -108,8 +113,17 @@ class LeaderPolicy(Policy):
     _next_indices: dict[int, int]   # next index to send to each follower
     _match_indices: dict[int, int]  # highest index replicated to each follower
 
-    async def broadcast_append_entries(self, entries: list[dict] | None = None):
-        for ep in self._server._peer_eps.values():
+    async def broadcast_append_entries(self):
+        for index, ep in self._server._peer_eps.items():
+            next_index = self._next_indices[index]
+            entries = [
+                {
+                    "index": i,
+                    "term": self._server._storage[i][0],
+                    "command": self._server._storage[i][1]
+                }
+                for i in range(next_index, len(self._server._storage) + 1)
+            ]
             request = {
                 "to": ep.to_dict(),
                 "content": {
@@ -118,7 +132,7 @@ class LeaderPolicy(Policy):
                     "leader_id": self._server._index,
                     "prev_log_index": len(self._server._storage),
                     "prev_log_term": self._server._storage[len(self._server._storage)][0] if len(self._server._storage) > 0 else 0,
-                    "entries": [] if entries is None else entries,
+                    "entries": entries,
                     "leader_commit": self._server._commit_index
                 }
             }
@@ -190,12 +204,36 @@ class LeaderPolicy(Policy):
         return self
 
 
+    async def _handle_append_entries_response(self, message: dict) -> Policy:
+        content = message["content"]
+        term, success = content["term"], content["success"]
+        if success:
+            # update next index and match index
+            follower_id = message["from"]["index"]
+            self._next_indices[follower_id] = content["last_index"] + 1
+            self._match_indices[follower_id] = content["last_index"]
+            # update commit index
+            match_indices = sorted(self._match_indices.values())
+            new_commit_index = match_indices[len(match_indices) // 2]
+            if new_commit_index > self._server._commit_index:
+                old_commit_index = self._server._commit_index
+                self._server._commit_index = new_commit_index
+                self.commit(old_commit_index)
+        else:
+            # TODO: decrement next index and retry
+            pass
+
+
     async def handle_event(self, message: dict) -> Policy:
         type = message["content"]["type"]
         if type == "AppendEntriesRPC":
             return await self._handle_append_entries(message)
         elif type == "RequestVoteRPC":
-            
+            return await self._handle_request_vote(message)
+        elif type == "AppendEntriesResponse":
+            return await self._handle_append_entries_response(message)
+        elif type == "Heartbeat":
+            await self.broadcast_append_entries()
 
 
 
@@ -261,7 +299,8 @@ class FollowerPolicy(GeneralPolicy):
             "content": {
                 "type": "AppendEntriesResponse",
                 "term": self._server._storage.current_term,
-                "success": success
+                "success": success,
+                "last_index": len(self._server._storage)
             }
         }
         self._server._writer.write(json.dumps(response).encode() + b"\n")
