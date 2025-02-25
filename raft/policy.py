@@ -16,11 +16,11 @@ class Policy:
         self._server = _server  # does not own it
 
 
-    def commit(self, old_commit_index: int, is_leader: bool):
-        # commit from old_commit_index + 1 to self._server._commit_index
-        # 1. Apply log entries to state machine
-        # 2. If leader, send response to client
-        raise NotImplementedError
+    def apply(self) -> list[dict]:
+        # apply log entries to state machine from last_applied + 1 to commit_index
+        # update last_applied and log results
+        # return the list of results
+        return self._server.apply()
 
 
     async def _process_request_vote(self, message: dict) -> tuple[bool, bool]:
@@ -75,6 +75,11 @@ class GeneralPolicy(Policy):
         self._election_timeout_task = None
 
 
+    def __del__(self):
+        if self._election_timeout_task is not None:
+            self._election_timeout_task.cancel()
+
+
     async def _handle_election_timeout(self):
         try:
             await asyncio.sleep(random.uniform(self._server._ELECTION_TIMEOUT_MIN, self._server._ELECTION_TIMEOUT_MAX) / 1000.0)
@@ -113,7 +118,7 @@ class LeaderPolicy(Policy):
     _next_indices: dict[int, int]   # next index to send to each follower
     _match_indices: dict[int, int]  # highest index replicated to each follower
 
-    async def broadcast_append_entries(self):
+    async def broadcast_append_entries(self, max_entries: int = 1):
         for index, ep in self._server._peer_eps.items():
             next_index = self._next_indices[index]
             entries = [
@@ -122,7 +127,7 @@ class LeaderPolicy(Policy):
                     "term": self._server._storage[i][0],
                     "command": self._server._storage[i][1]
                 }
-                for i in range(next_index, len(self._server._storage) + 1)
+                for i in range(next_index, min(next_index + max_entries, len(self._server._storage + 1)))
             ]
             request = {
                 "to": ep.to_dict(),
@@ -151,6 +156,24 @@ class LeaderPolicy(Policy):
     def __del__(self):
         if self._heartbeat_task is not None:
             self._heartbeat_task.cancel()
+
+
+    async def _respond_to_client(self, result: dict):
+        client_ip, client_port = result["ip"], result["port"]
+        response = {
+            "to": {
+                "ip": client_ip,
+                "port": client_port
+            },
+            "content": {
+                "type": "ClientResponse",
+                "serial_number": result["serial_number"],
+                "response": result["response"]
+            }
+        }
+        self._server._writer.write(json.dumps(response).encode() + b"\n")
+        self._server._logger.info(f"Sent {response} to {client_ip}:{client_port}")
+        await self._server._writer.drain()
 
 
     async def _handle_heartbeat(self):
@@ -186,7 +209,9 @@ class LeaderPolicy(Policy):
             "content": {
                 "type": "AppendEntriesResponse",
                 "term": self._server._storage.current_term,
-                "success": False
+                "success": False,
+                "last_index": len(self._server._storage),
+                "follower_id": self._server._index
             }
         }
         self._server._writer.write(json.dumps(response).encode() + b"\n")
@@ -206,22 +231,29 @@ class LeaderPolicy(Policy):
 
     async def _handle_append_entries_response(self, message: dict) -> Policy:
         content = message["content"]
-        term, success = content["term"], content["success"]
+        term, success, follower_id = content["term"], content["success"], content["follower_id"]
         if success:
             # update next index and match index
-            follower_id = message["from"]["index"]
             self._next_indices[follower_id] = content["last_index"] + 1
             self._match_indices[follower_id] = content["last_index"]
             # update commit index
             match_indices = sorted(self._match_indices.values())
             new_commit_index = match_indices[len(match_indices) // 2]
             if new_commit_index > self._server._commit_index:
-                old_commit_index = self._server._commit_index
                 self._server._commit_index = new_commit_index
-                self.commit(old_commit_index)
-        else:
-            # TODO: decrement next index and retry
-            pass
+                results = self.apply()
+                self._server._logger.info(f"Applied {results}")
+                # notify the client
+                for result in results:
+                    await self._respond_to_client(result)
+        elif term > self._server._storage.current_term:
+            # convert to follower if higher term discovered
+            self._server._storage.current_term = term
+            self._server._storage.voted_for = None
+            return FollowerPolicy(self._server)
+        # retry with a lower next index
+        self._next_indices[follower_id] -= 1
+        return self
 
 
     async def handle_event(self, message: dict) -> Policy:
@@ -233,8 +265,11 @@ class LeaderPolicy(Policy):
         elif type == "AppendEntriesResponse":
             return await self._handle_append_entries_response(message)
         elif type == "Heartbeat":
-            await self.broadcast_append_entries()
-
+            await self.broadcast_append_entries(self._server._MAX_ENTRIES_PER_APPEND_ENTRIES)
+            return self
+        else:
+            # TODO: handle client request
+            return self
 
 
 class FollowerPolicy(GeneralPolicy):
@@ -292,7 +327,7 @@ class FollowerPolicy(GeneralPolicy):
                 leader_commit, last_new_index = content["leader_commit"], content["entries"][-1]["index"]
                 if leader_commit > self._server._commit_index:
                     self._server._commit_index = min(leader_commit, last_new_index)
-                self.commit()
+                self.apply()
         # send response
         response = {
             "to": receive_from,
@@ -300,7 +335,8 @@ class FollowerPolicy(GeneralPolicy):
                 "type": "AppendEntriesResponse",
                 "term": self._server._storage.current_term,
                 "success": success,
-                "last_index": len(self._server._storage)
+                "last_index": len(self._server._storage),
+                "follower_id": self._server._index
             }
         }
         self._server._writer.write(json.dumps(response).encode() + b"\n")
@@ -339,7 +375,7 @@ class FollowerPolicy(GeneralPolicy):
             await self._handle_append_entries(message)
             return self
         elif type == "RequestVoteRPC":
-            # it will also cancel the election timeout if vote granted
+            # it will also reset election timeout if vote granted
             return await self._handle_request_vote(message)
         elif type == "ElectionTimeout":
             # start a new election and vote for self

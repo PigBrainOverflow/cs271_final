@@ -23,6 +23,7 @@ class Server:
     _ELECTION_TIMEOUT_MIN: int = 150    # milliseconds
     _ELECTION_TIMEOUT_MAX: int = 300
     _HEARTBEAT_INTERVAL: int = 50
+    _MAX_ENTRIES_PER_APPEND_ENTRIES: int = 10
 
     # Raft-related peresistent states
     _storage: PersistentStorage
@@ -31,6 +32,13 @@ class Server:
     _policy: Policy
     _commit_index: int
     _last_applied: int
+
+    def apply(self) -> list[dict]:
+        # apply log entries to state machine from last_applied + 1 to commit_index
+        # update last_applied and log results
+        # return the list of results
+        raise NotImplementedError
+
 
     def __init__(self, index: int, self_ep: Endpoint, router_ep: Endpoint, peer_eps: dict[int, Endpoint], logger = None):
         self._index = index
