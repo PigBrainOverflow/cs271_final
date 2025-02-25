@@ -151,7 +151,7 @@ if __name__ == "__main__":
     # parse arguments
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="config.json", help="path to the configuration file")
+    parser.add_argument("--config", default="config.json", type=str, help="path to the configuration file")
 
     # load configuration
     with open("config.json") as f:
