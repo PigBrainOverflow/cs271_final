@@ -20,6 +20,42 @@ class Policy:
         raise NotImplementedError
 
 
+    async def _process_request_vote(self, message: dict) -> tuple[bool, bool]:
+        # process the request vote message
+        # return (vote_granted, higher_term)
+        receive_from, content = message["from"], message["content"]
+        term, candidate_id, last_log_index, last_log_term = content["term"], content["candidate_id"], content["last_log_index"], content["last_log_term"]
+        vote_granted, higher_term = False, False    # reject if lower term
+        if term >= self._server._storage.current_term:
+            if term > self._server._storage.current_term:
+                # from a higher term candidate
+                higher_term = True
+                self._server._storage.current_term = term
+                self._server._storage.voted_for = None
+            if self._server._storage.voted_for is None or self._server._storage.voted_for == candidate_id:
+                # from a new candidate
+                last_index = len(self._server._storage)
+                last_entry = self._server._storage[last_index]
+                last_term = 0 if last_entry is None else last_entry[0]
+                if last_log_term > last_term or (last_log_term == last_term and last_log_index >= last_index):
+                    # candidate's log is up-to-date
+                    vote_granted = True
+                    self._server._storage.voted_for = candidate_id
+        # send response
+        response = {
+            "to": receive_from,
+            "content": {
+                "type": "RequestVoteResponse",
+                "term": self._server._storage.current_term,
+                "vote_granted": vote_granted
+            }
+        }
+        self._server._writer.write(json.dumps(response).encode() + b"\n")
+        self._server._logger.info(f"Sent {response} to {receive_from}")
+        await self._server._writer.drain()
+        return vote_granted, higher_term
+
+
     async def handle_event(self, message: dict) -> Policy:
         raise NotImplementedError
 
@@ -95,11 +131,72 @@ class LeaderPolicy(Policy):
         super().__init__(_server)
         self._next_indices = {index: len(_server._storage) + 1 for index in _server._peer_eps}
         self._match_indices = {index: 0 for index in _server._peer_eps}
-        self._heartbeat_task = None
+        self._heartbeat_task = asyncio.create_task(self._handle_heartbeat())
+
+
+    def __del__(self):
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+
+
+    async def _handle_heartbeat(self):
+        # infinitely put heartbeat notifications into the queue
+        try:
+            while True:
+                await asyncio.sleep(self._server._HEARTBEAT_INTERVAL / 1000.0)
+                self._server._logger.info("Sending heartbeat")
+                # put the message into the queue, notifies the server
+                await self._server._queue.put({
+                    "from": self._server._self_ep.to_dict(),
+                    "content": {
+                        "type": "Heartbeat"
+                    }
+                })
+        except asyncio.CancelledError:
+            pass
+
+
+    async def _handle_append_entries(self, message: dict) -> Policy:
+        receive_from, content = message["from"], message["content"]
+        term = content["term"]
+        # step down if higher term discovered
+        if term > self._server._storage.current_term:
+            self._server._storage.current_term = term
+            self._server._storage.voted_for = None
+            follower = FollowerPolicy(self._server, content["leader_id"])
+            follower._handle_append_entries(message)
+            return follower
+        # reject the request if lower or equal term
+        response = {
+            "to": receive_from,
+            "content": {
+                "type": "AppendEntriesResponse",
+                "term": self._server._storage.current_term,
+                "success": False
+            }
+        }
+        self._server._writer.write(json.dumps(response).encode() + b"\n")
+        self._server._logger.info(f"Sent {response} to {receive_from}")
+        await self._server._writer.drain()
+        return self
+
+
+    async def _handle_request_vote(self, message: dict) -> Policy:
+        # convert to follower if higher term discovered
+        # reject the request if lower or equal term
+        _, higher_term = await self._process_request_vote(message)
+        if higher_term:
+            return FollowerPolicy(self._server)
+        return self
 
 
     async def handle_event(self, message: dict) -> Policy:
         type = message["content"]["type"]
+        if type == "AppendEntriesRPC":
+            return await self._handle_append_entries(message)
+        elif type == "RequestVoteRPC":
+            
+
 
 
 class FollowerPolicy(GeneralPolicy):
@@ -113,6 +210,7 @@ class FollowerPolicy(GeneralPolicy):
     _election_timeout_task: asyncio.Task | None
 
     def __init__(self, _server: Server, leader_id: int | None = None):
+        # include reset election timeout
         super().__init__(_server)
         self._leader_id = leader_id
         self._election_timeout_task = None
@@ -172,40 +270,9 @@ class FollowerPolicy(GeneralPolicy):
 
 
     async def _handle_request_vote(self, message: dict) -> Policy:
-        receive_from, content = message["from"], message["content"]
-        term, candidate_id, last_log_index, last_log_term = content["term"], content["candidate_id"], content["last_log_index"], content["last_log_term"]
-        vote_granted = True
-        if term < self._server._storage.current_term:
-            # from an old candidate, reject
-            vote_granted = False
-        elif self._server._storage.voted_for is None or self._server._storage.voted_for == candidate_id:
-            # from a new candidate
-            last_index = len(self._server._storage)
-            last_entry = self._server._storage[last_index]
-            last_term = last_entry[0] if last_entry is not None else 0
-            if last_log_term < last_term or (last_log_term == last_term and last_log_index < last_index):
-                # candidate's log is not up-to-date
-                vote_granted = False
-        else:
-            # already voted for another candidate
-            vote_granted = False
-        # update current term
-        self._server._storage.current_term = max(self._server._storage.current_term, term)
-        # send response
-        response = {
-            "to": receive_from,
-            "content": {
-                "type": "RequestVoteResponse",
-                "term": self._server._storage.current_term,
-                "vote_granted": vote_granted
-            }
-        }
-        self._server._writer.write(json.dumps(response).encode() + b"\n")
-        self._server._logger.info(f"Sent {response} to {receive_from}")
-        await self._server._writer.drain()
-        # update voted for and reset election timeout if vote granted
+        vote_granted, _ = await self._process_request_vote(message)
+        # reset election timeout if vote granted
         if vote_granted:
-            self._server._storage.voted_for = candidate_id
             self._reset_election_timeout()
         return self
 
@@ -298,7 +365,6 @@ class CandidatePolicy(GeneralPolicy):
     async def _handle_append_entries(self, message: dict) -> Policy:
         # convert to follower
         follower = FollowerPolicy(self._server, message["content"]["leader_id"])
-        follower._reset_election_timeout()
         await follower._handle_append_entries(message)
         return follower
 
