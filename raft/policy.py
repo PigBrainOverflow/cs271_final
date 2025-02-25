@@ -234,7 +234,7 @@ class CandidatePolicy(GeneralPolicy):
     _name: str = "Candidate"
     _votes: set[int]    # set of servers that voted for this candidate
 
-    async def broadcast_request_vote(self):
+    async def _broadcast_request_vote(self):
         last_log_index = len(self._server._storage)
         request_content = {
             "type": "RequestVoteRPC",
@@ -292,6 +292,44 @@ class CandidatePolicy(GeneralPolicy):
         return self
 
 
+    async def _handle_request_vote(self, message: dict) -> Policy:
+        # does not reset election timeout here
+        receive_from, content = message["from"], message["content"]
+        term = content["term"]
+        if term > self._server._storage.current_term:
+            # convert to follower if higher term discovered
+            self._server._storage.current_term = term
+            self._server._storage.voted_for = content["candidate_id"]
+            response = {
+                "to": receive_from,
+                "content": {
+                    "type": "RequestVoteResponse",
+                    "term": self._server._storage.current_term,
+                    "vote_granted": True
+                }
+            }
+            self._server._writer.write(json.dumps(response).encode() + b"\n")
+            self._server._logger.info(f"Sent {response} to {receive_from}")
+            await self._server._writer.drain()
+            return FollowerPolicy(self._server)
+        return self # ignore the request
+
+
+    async def _handle_client_request(self, message: dict):
+        # tell the client current leader
+        receive_from = message["from"]
+        response = {
+            "to": receive_from,
+            "content": {
+                "type": "ClientResponse",
+                "leader_id": None
+            }
+        }
+        self._server._writer.write(json.dumps(response).encode() + b"\n")
+        self._server._logger.info(f"Sent {response} to {receive_from}")
+        await self._server._writer.drain()
+
+
     async def handle_event(self, message) -> Policy:
         type = message["content"]["type"]
         if type == "AppendEntriesRPC":
@@ -304,12 +342,10 @@ class CandidatePolicy(GeneralPolicy):
         elif type == "ElectionTimeout":
             # start a new election and vote for self
             self._init()
-            await self.broadcast_request_vote()
+            await self._broadcast_request_vote()
             return self
         elif type == "RequestVoteRPC":
-            # TODO: handle request vote
-            return self
-        else:
-            # ignore other messages
-            # TODO: handle client requests
+            return await self._handle_request_vote(message)
+        elif type == "ClientRequest":
+            await self._handle_client_request(message)
             return self
