@@ -72,35 +72,40 @@ class Server:
                     self._logger.error("Invalid message from router")
                     continue
                 await self._queue.put(data) # put data into the queue
-        except asyncio.IncompleteReadError:
+        except:
             self._logger.info("Router closed connection")
         finally:
             self._writer.close()
-            await self._writer.wait_closed()
 
 
     async def _read_from_queue(self):
         # read from the queue and handle the message
-        while True:
-            msg = await self._queue.get()
-            self._logger.info(f"Handling event {msg}")
-            self._policy = await self._policy.handle_event(msg)
+        try:
+            while True:
+                msg = await self._queue.get()
+                self._logger.info(f"Handling event {msg}")
+                self._policy = await self._policy.handle_event(msg)
+        except:
+            pass
 
 
     async def async_start(self):
         self._storage = PersistentStorage(f"server{self._index}")
         # start as a follower
         self._policy = FollowerPolicy(self)
-        await self._connect_to_router()
-        _, pending = await asyncio.wait(
-            [
-                asyncio.create_task(self._read_from_router()),
-                asyncio.create_task(self._read_from_queue())
-            ],
-            return_when=asyncio.FIRST_COMPLETED  # stop when any task completes
-        )
-        for task in pending:
-            task.cancel()
+        try:
+            await self._connect_to_router()
+            _, pending = await asyncio.wait(
+                [
+                    asyncio.create_task(self._read_from_router()),
+                    asyncio.create_task(self._read_from_queue())
+                ],
+                return_when=asyncio.FIRST_COMPLETED  # stop when any task completes
+            )
+            for task in pending:
+                task.cancel()
+        except:
+            pass
         self._logger.info("Server terminated successfully")
 
 

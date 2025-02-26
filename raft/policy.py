@@ -123,7 +123,7 @@ class LeaderPolicy(Policy):
         for index, ep in self._server._peer_eps.items():
             next_index = self._next_indices[index]
             entries = []
-            self._server._logger.info(f"next_index: {next_index}, max_entries: {max_entries}, len: {len(self._server._storage) + 1}")
+            # self._server._logger.info(f"next_index: {next_index}, max_entries: {max_entries}, len: {len(self._server._storage) + 1}")
             for i in range(next_index, min(next_index + max_entries, len(self._server._storage) + 1)):
                 term, ip, port, serial_number, content, _ = self._server._storage[i]
                 entries.append({
@@ -155,8 +155,9 @@ class LeaderPolicy(Policy):
 
     def __init__(self, _server: Server):
         super().__init__(_server)
+        self._server._logger.info("Becoming leader")
         self._next_indices = {index: len(_server._storage) + 1 for index in _server._peer_eps.keys()}
-        self._server._logger.info(f"next_indices: {self._next_indices}")
+        # self._server._logger.info(f"next_indices: {self._next_indices}")
         self._match_indices = {index: 0 for index in _server._peer_eps.keys()}
         self._heartbeat_task = asyncio.create_task(self._handle_heartbeat())
 
@@ -260,7 +261,8 @@ class LeaderPolicy(Policy):
             self._server._storage.voted_for = None
             return FollowerPolicy(self._server)
         # retry with a lower next index
-        self._next_indices[follower_id] -= 1
+        else:
+            self._next_indices[follower_id] -= 1
         return self
 
 
@@ -351,10 +353,11 @@ class FollowerPolicy(GeneralPolicy):
                     else:
                         self._server._storage.append(index, term, ip, port, serial_number, command_content)
                 # update commit index
-                leader_commit, last_new_index = content["leader_commit"], content["entries"][-1]["index"]
-                if leader_commit > self._server._commit_index:
-                    self._server._commit_index = min(leader_commit, last_new_index)
-                self.apply()
+                if len(content["entries"]) > 0: # not a heartbeat
+                    leader_commit, last_new_index = content["leader_commit"], content["entries"][-1]["index"]
+                    if leader_commit > self._server._commit_index:
+                        self._server._commit_index = min(leader_commit, last_new_index)
+                    self.apply()
         # send response
         response = {
             "to": receive_from,
