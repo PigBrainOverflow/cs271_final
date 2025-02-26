@@ -78,6 +78,10 @@ class Server(raft.Server):
             entry = self._log[self._last_applied]
             type = entry[4]["type"]
             if type == "LockAcquire":
-                results.append(self._handle_lock_acquire(entry))
+                result = self._handle_lock_acquire(entry)
             elif type == "LockRelease":
-                results.append(self._handle_lock_release(entry))
+                result = self._handle_lock_release(entry)
+            # update log result
+            self._storage.set_result(self._last_applied, result["response"])
+            results.append(result)
+        return results

@@ -111,3 +111,9 @@ class PersistentStorage:
     def set_result(self, index: int, result: dict):
         self._db_conn.execute("UPDATE log SET result = ? WHERE index_ = ?", (json.dumps(result), index))
         self._db_conn.commit()
+
+
+    def get_result(self, index: int) -> dict | None:
+        cursor = self._db_conn.execute("SELECT result FROM log WHERE index_ = ?", (index,))
+        row = cursor.fetchone()
+        return None if row is None else json.loads(row[0])

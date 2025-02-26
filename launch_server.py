@@ -1,4 +1,4 @@
-from raft.server import Server
+from server import Server
 from utils import Endpoint
 
 
@@ -46,6 +46,8 @@ if __name__ == "__main__":
         self_ep=self_ep,
         router_ep=router_ep,
         peer_eps=peer_eps,
-        logger=logger
+        logger=logger,
+        lock_table={i: None for i in range(1, 1001)},
+        balance_table={i: 10 for i in range(1, 1001)}
     )
     server.start()

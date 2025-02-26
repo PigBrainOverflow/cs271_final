@@ -91,12 +91,12 @@ class Router:
                     continue
                 if "to" in data and "content" in data:
                     to, content = data["to"], data["content"]
-                    to_ep = Endpoint(*to)
+                    to_ep = Endpoint(to["ip"], to["port"])
                     if to_ep in self._connections:
                         if to_ep in self._crashed_connections:
                             self._logger.info(f"Failed to send {content} to {to_ep}")
                         else:
-                            self._connections[to_ep].write(json.dumps({"from": peername, "content": content}).encode() + b"\n")
+                            self._connections[to_ep].write(json.dumps({"from": peername.to_dict(), "content": content}).encode() + b"\n")
                             # await self._connections[to_ep].drain()
                             self._logger.info(f"Sent {content} to {to_ep}")
                     else:

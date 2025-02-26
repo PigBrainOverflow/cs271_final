@@ -35,7 +35,7 @@ class Server:
 
     def apply(self) -> list[dict]:
         # apply log entries to state machine from last_applied + 1 to commit_index
-        # update last_applied and log results
+        # update last_applied
         # return the list of results
         raise NotImplementedError
 
