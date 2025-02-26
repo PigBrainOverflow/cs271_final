@@ -117,3 +117,9 @@ class PersistentStorage:
         cursor = self._db_conn.execute("SELECT result FROM log WHERE index_ = ?", (index,))
         row = cursor.fetchone()
         return None if row is None else json.loads(row[0])
+
+
+    def get_result_by_serial_number(self, ip: str, port: int, serial_number: int) -> tuple[bool, dict | None]:
+        cursor = self._db_conn.execute("SELECT result FROM log WHERE client_ip = ? AND client_port = ? AND serial_number = ?", (ip, port, serial_number))
+        row = cursor.fetchone()
+        return row is not None, None if row is None else json.loads(row[0])

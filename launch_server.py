@@ -34,7 +34,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.StreamHandler(),
+            # logging.StreamHandler(),
             logging.FileHandler(f"server{index}.log", mode="w")
         ]
     )

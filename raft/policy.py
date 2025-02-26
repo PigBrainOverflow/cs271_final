@@ -267,15 +267,25 @@ class LeaderPolicy(Policy):
 
 
     async def _handle_client_request(self, message: dict):
-        # append the command to the local log
         receive_from, content = message["from"], message["content"]
+        ip, port = receive_from["ip"], receive_from["port"]
+        serial_number, command = content["serial_number"], content["command"]
+        # check if the request is already in the log
+        found, result = self._server._storage.get_result_by_serial_number(ip, port, serial_number)
+        if found:
+            if result is not None:
+                # already processed, respond to the client
+                await self._respond_to_client(result)
+            return
+
+        # append the command to the local log
         self._server._storage.append(
             index=len(self._server._storage) + 1,
             term=self._server._storage.current_term,
-            client_ip=receive_from["ip"],
-            client_port=receive_from["port"],
-            serial_number=content["serial_number"],
-            command=content["command"]
+            client_ip=ip,
+            client_port=port,
+            serial_number=serial_number,
+            command=command
         )
         # no need to send response here
         # it's handled by the heartbeat
