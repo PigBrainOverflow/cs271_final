@@ -12,7 +12,15 @@
             {
                 "term": 1,
                 "index": 1,
-                "command": {}
+                "command": {
+                    "ip": "127.0.0.1",
+                    "port": 8080,
+                    "serial_number": 1,
+                    "content": {
+                        "type": "LockAcquire",
+                        "item_id": 1
+                    }
+                }
             }
         ],
         "leader_commit": 1
@@ -40,7 +48,9 @@
     {
         "type": "ClientRequest",
         "serial_number": 1,
-        "command": {}
+        "command": {
+            "type": "LockAcquire"
+        }
     },
     {
         "type": "ClientResponse",

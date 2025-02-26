@@ -34,6 +34,9 @@ class PersistentStorage:
         CREATE TABLE IF NOT EXISTS log (
             index_ INTEGER PRIMARY KEY,
             term INTEGER,
+            client_ip VARCHAR(32),
+            client_port INTEGER,
+            serial_number INTEGER,
             command JSON,
             result JSON DEFAULT NULL
         );
@@ -80,20 +83,18 @@ class PersistentStorage:
         self._db_conn.commit()
 
 
-    def append(self, index: int, term: int, command: dict, result: dict | None = None):
-        self._db_conn.execute("INSERT INTO log (index_, term, command, committed) VALUES (?, ?, ?, ?)", (index, term, json.dumps(command), None if result is None else json.dumps(result)))
+    def append(self, index: int, term: int, client_ip: str, client_port: int, serial_number: int, command: dict, result: dict | None = None):
+        self._db_conn.execute(
+            "INSERT INTO log (index_, term, client_ip, client_port, serial_number, command, result) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (index, term, client_ip, client_port, serial_number, json.dumps(command), None if result is None else json.dumps(result)))
         self._db_conn.commit()
 
 
-    def __getitem__(self, index: int) -> tuple[int, dict, dict | None] | None:
-        cursor = self._db_conn.execute("SELECT term, command, result FROM log WHERE index_ = ?", (index,))
+    def __getitem__(self, index: int) -> tuple[int, str, int, int, dict, dict | None] | None:
+        # return (term, client_ip, client_port, serial_number, command, result)
+        cursor = self._db_conn.execute("SELECT term, client_ip, client_port, serial_number, command, result FROM log WHERE index_ = ?", (index,))
         row = cursor.fetchone()
-        return None if row is None else (row[0], json.loads(row[1]), None if row[2] is None else json.loads(row[2]))
-
-
-    def __setitem__(self, index: int, term: int, command: dict, result: dict | None):
-        self._db_conn.execute("UPDATE log SET term = ?, command = ?, result = ? WHERE index_ = ?", (term, json.dumps(command), None if result is None else json.dumps(result), index))
-        self._db_conn.commit()
+        return None if row is None else (row[0], row[1], row[2], row[3], json.loads(row[4]), None if row[5] is None else json.loads(row[5]))
 
 
     def __len__(self) -> int:

@@ -121,14 +121,19 @@ class LeaderPolicy(Policy):
     async def broadcast_append_entries(self, max_entries: int = 1):
         for index, ep in self._server._peer_eps.items():
             next_index = self._next_indices[index]
-            entries = [
-                {
+            entries = []
+            for i in range(next_index, min(next_index + max_entries, len(self._server._storage) + 1)):
+                term, ip, port, serial_number, content, _ = self._server._storage[i]
+                entries.append({
                     "index": i,
-                    "term": self._server._storage[i][0],
-                    "command": self._server._storage[i][1]
-                }
-                for i in range(next_index, min(next_index + max_entries, len(self._server._storage + 1)))
-            ]
+                    "term": term,
+                    "command": {
+                        "ip": ip,
+                        "port": port,
+                        "serial_number": serial_number,
+                        "content": content
+                    }
+                })
             request = {
                 "to": ep.to_dict(),
                 "content": {
@@ -259,13 +264,14 @@ class LeaderPolicy(Policy):
     async def _handle_client_request(self, message: dict):
         # append the command to the local log
         receive_from, content = message["from"], message["content"]
-        command_in_log = {
-            "ip": receive_from["ip"],   # client endpoint
-            "port": receive_from["port"],
-            "serial_number": content["serial_number"],
-            "content": content["command"]
-        }
-        self._server._storage.append(len(self._server._storage) + 1, self._server._storage.current_term, command_in_log)
+        self._server._storage.append(
+            index=len(self._server._storage) + 1,
+            term=self._server._storage.current_term,
+            client_ip=receive_from["ip"],
+            client_port=receive_from["port"],
+            serial_number=content["serial_number"],
+            command=content["command"]
+        )
         # no need to send response here
         # it's handled by the heartbeat
 
@@ -331,15 +337,16 @@ class FollowerPolicy(GeneralPolicy):
                 conflict_found = False
                 for entry in content["entries"]:
                     index, term, command = entry["index"], entry["term"], entry["command"]
+                    ip, port, serial_number, command_content = command["ip"], command["port"], command["serial_number"], command["content"]
                     if not conflict_found:
                         entry_in_log = self._server._storage[index]
                         if entry_in_log is None or entry_in_log[0] != term:
                             # find the first conflicting entry
                             conflict_found = True
                             self._server._storage.remove_back(index)
-                            self._server._storage.append(index, term, command)
+                            self._server._storage.append(index, term, ip, port, serial_number, command_content)
                     else:
-                        self._server._storage.append(index, term, command)
+                        self._server._storage.append(index, term, ip, port, serial_number, command_content)
                 # update commit index
                 leader_commit, last_new_index = content["leader_commit"], content["entries"][-1]["index"]
                 if leader_commit > self._server._commit_index:
