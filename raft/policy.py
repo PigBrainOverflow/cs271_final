@@ -50,7 +50,8 @@ class Policy:
             "content": {
                 "type": "RequestVoteResponse",
                 "term": self._server._storage.current_term,
-                "vote_granted": vote_granted
+                "vote_granted": vote_granted,
+                "voter_id": self._server._index
             }
         }
         self._server._writer.write(json.dumps(response).encode() + b"\n")
@@ -122,6 +123,7 @@ class LeaderPolicy(Policy):
         for index, ep in self._server._peer_eps.items():
             next_index = self._next_indices[index]
             entries = []
+            self._server._logger.info(f"next_index: {next_index}, max_entries: {max_entries}, len: {len(self._server._storage) + 1}")
             for i in range(next_index, min(next_index + max_entries, len(self._server._storage) + 1)):
                 term, ip, port, serial_number, content, _ = self._server._storage[i]
                 entries.append({
@@ -153,8 +155,9 @@ class LeaderPolicy(Policy):
 
     def __init__(self, _server: Server):
         super().__init__(_server)
-        self._next_indices = {index: len(_server._storage) + 1 for index in _server._peer_eps}
-        self._match_indices = {index: 0 for index in _server._peer_eps}
+        self._next_indices = {index: len(_server._storage) + 1 for index in _server._peer_eps.keys()}
+        self._server._logger.info(f"next_indices: {self._next_indices}")
+        self._match_indices = {index: 0 for index in _server._peer_eps.keys()}
         self._heartbeat_task = asyncio.create_task(self._handle_heartbeat())
 
 
@@ -330,7 +333,7 @@ class FollowerPolicy(GeneralPolicy):
             # check prev log
             prev_log_index, prev_log_term = content["prev_log_index"], content["prev_log_term"]
             entry = self._server._storage[prev_log_index]
-            if entry is None or entry[0] != prev_log_term:  # log inconsistency
+            if (entry is None or entry[0] != prev_log_term) and prev_log_index != 0:    # log is inconsistent
                 success = False
             else:
                 # append entries
@@ -462,6 +465,24 @@ class CandidatePolicy(GeneralPolicy):
 
 
     async def _handle_append_entries(self, message: dict) -> Policy:
+        receive_from, content = message["from"], message["content"]
+        term = content["term"]
+        if term < self._server._storage.current_term:
+            # reject the request if lower term
+            response = {
+                "to": receive_from,
+                "content": {
+                    "type": "AppendEntriesResponse",
+                    "term": self._server._storage.current_term,
+                    "success": False,
+                    "last_index": len(self._server._storage),
+                    "follower_id": self._server._index
+                }
+            }
+            self._server._writer.write(json.dumps(response).encode() + b"\n")
+            self._server._logger.info(f"Sent {response} to {receive_from}")
+            await self._server._writer.drain()
+            return self
         # convert to follower
         follower = FollowerPolicy(self._server, message["content"]["leader_id"])
         await follower._handle_append_entries(message)
@@ -501,7 +522,8 @@ class CandidatePolicy(GeneralPolicy):
                 "content": {
                     "type": "RequestVoteResponse",
                     "term": self._server._storage.current_term,
-                    "vote_granted": True
+                    "vote_granted": True,
+                    "voter_id": self._server._index
                 }
             }
             self._server._writer.write(json.dumps(response).encode() + b"\n")

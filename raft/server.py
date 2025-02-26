@@ -50,6 +50,9 @@ class Server:
         self._writer = None
         self._queue = asyncio.Queue()
         self._storage = None
+        self._policy = None
+        self._commit_index = 0
+        self._last_applied = 0
 
 
     async def _connect_to_router(self):
