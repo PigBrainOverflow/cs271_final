@@ -3,6 +3,9 @@ import sys
 import signal
 
 
+# run setup_db.py to initialize the database
+# subprocess.Popen([sys.executable, "setup_db.py"]).wait()
+
 processes = [
     subprocess.Popen([sys.executable, "launch_router.py"]),
     subprocess.Popen([sys.executable, "launch_server.py", "--cluster", "0", "--member", "0"]),
@@ -17,6 +20,4 @@ try:
         process.wait()
 except KeyboardInterrupt:
     processes[0].send_signal(signal.SIGINT)
-    for process in processes:
-        process.wait()
     print("Terminated by user")

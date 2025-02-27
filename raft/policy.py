@@ -70,37 +70,49 @@ class GeneralPolicy(Policy):
     2. If RPC request or response contains termT > currentTerm: set currentTerm = T,convert to follower.
     """
     _election_timeout_task: asyncio.Task | None
+    _reset_event: asyncio.Event
+    _is_active: bool
 
     def __init__(self, _server: Server):
         super().__init__(_server)
-        self._election_timeout_task = None
+        self._is_active = True
+        self._election_timeout_task = asyncio.create_task(self._handle_election_timeout())
+        self._reset_event = asyncio.Event()
 
 
     def __del__(self):
-        if self._election_timeout_task is not None:
+        self._is_active = False
+        if self._election_timeout_task:
             self._election_timeout_task.cancel()
 
 
     async def _handle_election_timeout(self):
         try:
-            await asyncio.sleep(random.uniform(self._server._ELECTION_TIMEOUT_MIN, self._server._ELECTION_TIMEOUT_MAX) / 1000.0)
-            self._server._logger.info("Election timeout elapsed")
-            # put the message into the queue, notifies the server
-            await self._server._queue.put({
-                "from": self._server._self_ep.to_dict(),
-                "content": {
-                    "type": "ElectionTimeout",
-                    "term": self._server._storage.current_term
-                }
-            })
+            while self._is_active:
+                self._reset_event.clear()
+                try:
+                    await asyncio.wait_for(
+                        self._reset_event.wait(),
+                        random.uniform(self._server._ELECTION_TIMEOUT_MIN, self._server._ELECTION_TIMEOUT_MAX) / 1000.0
+                    )
+                except asyncio.TimeoutError:
+                    if self._is_active and not self._reset_event.is_set():  # must check active and not set again
+                        self._server._logger.info("Election timeout elapsed")
+                        # put the message into the queue, notifies the server
+                        await self._server._queue.put({
+                            "from": self._server._self_ep.to_dict(),
+                            "content": {
+                                "type": "ElectionTimeout",
+                                "term": self._server._storage.current_term
+                            }
+                        })
         except asyncio.CancelledError:
             pass
 
 
     def _reset_election_timeout(self):
-        if self._election_timeout_task is not None:
-            self._election_timeout_task.cancel()
-        self._election_timeout_task = asyncio.create_task(self._handle_election_timeout())
+        self._server._logger.info("Resetting election timeout")
+        self._reset_event.set()
 
 
 class LeaderPolicy(Policy):
