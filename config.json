@@ -9,6 +9,7 @@
     },
     "clusters": [
         {
+            "index": 1,
             "members": [
                 {
                     "index": 1,

@@ -114,15 +114,16 @@ class Router:
 
     async def _handle_connection(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         # Accept a new connection
-        peername = Endpoint(*writer.get_extra_info("peername"))
-        self._logger.info(f"Connection from {peername}")
-        self._connections[peername] = writer
-
-        if peername == self._user_ep:
-            await self._handle_user(reader, writer)
-
-        else:
-            await self._handle_others(reader, writer, peername)
+        try:
+            peername = Endpoint(*writer.get_extra_info("peername"))
+            self._logger.info(f"Connection from {peername}")
+            self._connections[peername] = writer
+            if peername == self._user_ep:
+                await self._handle_user(reader, writer)
+            else:
+                await self._handle_others(reader, writer, peername)
+        except:
+            self._logger.info(f"Connection from {peername} closed unexpectedly")
 
 
     async def _accept(self):

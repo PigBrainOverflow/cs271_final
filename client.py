@@ -16,15 +16,15 @@ class Client(raft.Client):
 
 
     def start(self):
-        asyncio.run_coroutine_threadsafe(self._connect_to_router(), self._loop).result()
+        self._loop.run_until_complete(self._connect_to_router())
 
 
     def request(self, cluster: int, command: dict) -> dict | None:
         server_index = self._leaders[cluster]
         server_index = server_index if server_index is not None else self._clusters[cluster][0]
-        asyncio.run_coroutine_threadsafe(self.send_request(server_index, self._serial_number, command), self._loop).result()
+        self._loop.run_until_complete(self.send_request(server_index, command))
         # wait for the response
         while True:
-            response = asyncio.run_coroutine_threadsafe(self.receive_response(), self._loop).result()
+            response = self._loop.run_until_complete(self.receive_response())
             if response["serial_number"] == self._serial_number:
                 return response["response"]
