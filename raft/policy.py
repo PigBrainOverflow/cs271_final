@@ -89,7 +89,8 @@ class GeneralPolicy(Policy):
             await self._server._queue.put({
                 "from": self._server._self_ep.to_dict(),
                 "content": {
-                    "type": "ElectionTimeout"
+                    "type": "ElectionTimeout",
+                    "term": self._server._storage.current_term
                 }
             })
         except asyncio.CancelledError:
@@ -195,7 +196,8 @@ class LeaderPolicy(Policy):
                 await self._server._queue.put({
                     "from": self._server._self_ep.to_dict(),
                     "content": {
-                        "type": "Heartbeat"
+                        "type": "Heartbeat",
+                        "term": self._server._storage.current_term
                     }
                 })
         except asyncio.CancelledError:
@@ -300,7 +302,8 @@ class LeaderPolicy(Policy):
         elif type == "AppendEntriesResponse":
             return await self._handle_append_entries_response(message)
         elif type == "Heartbeat":
-            await self.broadcast_append_entries(self._server._MAX_ENTRIES_PER_APPEND_ENTRIES)
+            if message["content"]["term"] == self._server._storage.current_term:
+                await self.broadcast_append_entries(self._server._MAX_ENTRIES_PER_APPEND_ENTRIES)
             return self
         elif type == "ClientRequest":
             await self._handle_client_request(message)
@@ -318,13 +321,12 @@ class FollowerPolicy(GeneralPolicy):
 
     _name: str = "Follower"
     _leader_id: int | None
-    _election_timeout_task: asyncio.Task | None
 
     def __init__(self, _server: Server, leader_id: int | None = None):
         # include reset election timeout
         super().__init__(_server)
+        self._server._logger.info("Becoming follower")
         self._leader_id = leader_id
-        self._election_timeout_task = None
         self._reset_election_timeout()
 
 
@@ -418,10 +420,13 @@ class FollowerPolicy(GeneralPolicy):
             # it will also reset election timeout if vote granted
             return await self._handle_request_vote(message)
         elif type == "ElectionTimeout":
-            # start a new election and vote for self
-            candidate = CandidatePolicy(self._server)
-            await candidate.broadcast_request_vote()
-            return candidate
+            if message["content"]["term"] == self._server._storage.current_term:
+                # start a new election and vote for self
+                candidate = CandidatePolicy(self._server)
+                await candidate.broadcast_request_vote()
+                return candidate
+            # ignore election timeout from previous term
+            return self
         elif type == "ClientRequest":
             await self._handle_client_request(message)
             return self
@@ -474,6 +479,7 @@ class CandidatePolicy(GeneralPolicy):
 
     def __init__(self, _server: Server):
         super().__init__(_server)
+        self._server._logger.info("Becoming candidate")
         self._init()
 
 
@@ -572,8 +578,9 @@ class CandidatePolicy(GeneralPolicy):
             return await self._handle_request_vote_response(message)
         elif type == "ElectionTimeout":
             # start a new election and vote for self
-            self._init()
-            await self.broadcast_request_vote()
+            if message["content"]["term"] == self._server._storage.current_term:
+                self._init()
+                await self.broadcast_request_vote()
             return self
         elif type == "RequestVoteRPC":
             return await self._handle_request_vote(message)

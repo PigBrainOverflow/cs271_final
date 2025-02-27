@@ -1,6 +1,7 @@
 [
     {
-        "type": "ElectionTimeout"
+        "type": "ElectionTimeout",
+        "term": 1
     },
     {
         "type": "AppendEntriesRPC",
