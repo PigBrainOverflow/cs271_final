@@ -95,11 +95,11 @@ class Client:
                 "port": self._server_eps[index].port
             },
             "content": {
+                "type": "ClientRequest",
                 "serial_number": self._serial_number,
                 "command": command
             }
         }
         self._writer.write(json.dumps(request).encode() + b"\n")
         self._logger.info(f"Sent {request} to {self._server_eps[index]}")
-        self._serial_number += 1
         await self._writer.drain()

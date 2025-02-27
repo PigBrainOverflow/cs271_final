@@ -75,8 +75,9 @@ class Server(raft.Server):
         results = []
         while self._last_applied < self._commit_index:
             self._last_applied += 1
-            entry = self._log[self._last_applied]
+            entry = self._storage[self._last_applied]
             type = entry[4]["type"]
+            self._logger.info(f"Applying {type} at index {self._last_applied}")
             if type == "LockAcquire":
                 result = self._handle_lock_acquire(entry)
             elif type == "LockRelease":

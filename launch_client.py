@@ -48,8 +48,12 @@ if __name__ == "__main__":
     while True:
         try:
             cluster = int(input("Cluster: "))
-            command = json.loads(input("Command: "))
-            response = client.request(cluster, command)
+            command = str(input("Command: "))
+            if command == "LockAcquire":
+                item_id = int(input("Item ID: "))
+                response = client.lock_acquire(cluster, item_id)
+            else:
+                print("Invalid command")
             print(response)
         except KeyboardInterrupt:
             break

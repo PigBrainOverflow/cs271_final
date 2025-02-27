@@ -20,8 +20,8 @@ class Server:
     _logger: logging.Logger
 
     # Raft-related constants
-    _ELECTION_TIMEOUT_MIN: int = 250    # milliseconds
-    _ELECTION_TIMEOUT_MAX: int = 500
+    _ELECTION_TIMEOUT_MIN: int = 150    # milliseconds
+    _ELECTION_TIMEOUT_MAX: int = 300
     _HEARTBEAT_INTERVAL: int = 50
     _MAX_ENTRIES_PER_APPEND_ENTRIES: int = 10
 

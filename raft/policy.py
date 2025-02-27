@@ -156,8 +156,8 @@ class LeaderPolicy(Policy):
                     "type": "AppendEntriesRPC",
                     "term": self._server._storage.current_term,
                     "leader_id": self._server._index,
-                    "prev_log_index": len(self._server._storage),
-                    "prev_log_term": self._server._storage[len(self._server._storage)][0] if len(self._server._storage) > 0 else 0,
+                    "prev_log_index": next_index - 1,
+                    "prev_log_term": self._server._storage[next_index - 1][0] if next_index > 1 else 0,
                     "entries": entries,
                     "leader_commit": self._server._commit_index
                 }
@@ -258,11 +258,13 @@ class LeaderPolicy(Policy):
         term, success, follower_id = content["term"], content["success"], content["follower_id"]
         if success:
             # update next index and match index
+            self._server._logger.info(f"Received success from {follower_id}")
             self._next_indices[follower_id] = content["last_index"] + 1
             self._match_indices[follower_id] = content["last_index"]
             # update commit index
             match_indices = sorted(self._match_indices.values())
             new_commit_index = match_indices[len(match_indices) // 2]
+            self._server._logger.info(f"New commit index: {new_commit_index}")
             if new_commit_index > self._server._commit_index:
                 self._server._commit_index = new_commit_index
                 results = self.apply()
@@ -294,6 +296,7 @@ class LeaderPolicy(Policy):
             return
 
         # append the command to the local log
+        self._server._logger.info(f"Appending command {command} to the log")
         self._server._storage.append(
             index=len(self._server._storage) + 1,
             term=self._server._storage.current_term,
@@ -413,6 +416,7 @@ class FollowerPolicy(GeneralPolicy):
             "to": receive_from,
             "content": {
                 "type": "ClientResponse",
+                "serial_number": message["content"]["serial_number"],
                 "leader_id": self._leader_id
             }
         }
@@ -577,6 +581,7 @@ class CandidatePolicy(GeneralPolicy):
             "to": receive_from,
             "content": {
                 "type": "ClientResponse",
+                "serial_number": message["content"]["serial_number"],
                 "leader_id": None
             }
         }
