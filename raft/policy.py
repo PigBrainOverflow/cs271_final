@@ -80,12 +80,6 @@ class GeneralPolicy(Policy):
         self._reset_event = asyncio.Event()
 
 
-    def __del__(self):
-        self._is_active = False
-        if self._election_timeout_task:
-            self._election_timeout_task.cancel()
-
-
     async def _handle_election_timeout(self):
         try:
             while self._is_active:
@@ -113,6 +107,13 @@ class GeneralPolicy(Policy):
     def _reset_election_timeout(self):
         self._server._logger.info("Resetting election timeout")
         self._reset_event.set()
+
+
+    def _stop_election_timeout(self):
+        self._server._logger.info("Stopping election timeout")
+        self._is_active = False
+        if self._election_timeout_task:
+            self._election_timeout_task.cancel()
 
 
 class LeaderPolicy(Policy):
@@ -398,12 +399,11 @@ class FollowerPolicy(GeneralPolicy):
         await self._server._writer.drain()
 
 
-    async def _handle_request_vote(self, message: dict) -> Policy:
+    async def _handle_request_vote(self, message: dict):
         vote_granted, _ = await self._process_request_vote(message)
         # reset election timeout if vote granted
         if vote_granted:
             self._reset_election_timeout()
-        return self
 
 
     async def _handle_client_request(self, message: dict):
@@ -430,10 +430,12 @@ class FollowerPolicy(GeneralPolicy):
             return self
         elif type == "RequestVoteRPC":
             # it will also reset election timeout if vote granted
-            return await self._handle_request_vote(message)
+            await self._handle_request_vote(message)
+            return self
         elif type == "ElectionTimeout":
             if message["content"]["term"] == self._server._storage.current_term:
                 # start a new election and vote for self
+                self._stop_election_timeout()
                 candidate = CandidatePolicy(self._server)
                 await candidate.broadcast_request_vote()
                 return candidate
@@ -515,6 +517,7 @@ class CandidatePolicy(GeneralPolicy):
             await self._server._writer.drain()
             return self
         # convert to follower
+        self._stop_election_timeout()
         follower = FollowerPolicy(self._server, message["content"]["leader_id"])
         await follower._handle_append_entries(message)
         return follower
@@ -528,12 +531,14 @@ class CandidatePolicy(GeneralPolicy):
             self._server._storage.current_term = term
             self._server._storage.voted_for = None
             # this follower does not know the new leader yet
+            self._stop_election_timeout()
             return FollowerPolicy(self._server)
         elif term == self._server._storage.current_term and vote_granted:
             # vote granted
             self._votes.add(content["voter_id"])
             if len(self._votes) + 1 > (len(self._server._peer_eps) + 1) // 2:
                 # convert to leader
+                self._stop_election_timeout()
                 leader = LeaderPolicy(self._server)
                 await leader.broadcast_append_entries()   # send initial heartbeat
                 return leader
@@ -560,6 +565,7 @@ class CandidatePolicy(GeneralPolicy):
             self._server._writer.write(json.dumps(response).encode() + b"\n")
             self._server._logger.info(f"Sent {response} to {receive_from}")
             await self._server._writer.drain()
+            self._stop_election_timeout()
             return FollowerPolicy(self._server)
         return self # ignore the request
 
