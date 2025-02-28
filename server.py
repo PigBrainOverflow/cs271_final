@@ -90,9 +90,11 @@ class Server(raft.Server):
 
 
     def _handle_deposit(self, entry: tuple[int, str, int, int, dict, dict | None]) -> dict:
+        # self._logger.info(entry)
         _, ip, port, serial_number, command, _ = entry
         item_id, amount = command["item_id"], command["amount"]
-        status, = False
+        status = False
+        # self._logger.info(f"Depositing {amount} to {item_id}")
         if item_id in self._balance_table:
             status = True
             self._balance_table[item_id] += amount
@@ -111,7 +113,7 @@ class Server(raft.Server):
         # you need to check the balance before calling this function
         _, ip, port, serial_number, command, _ = entry
         item_id, amount = command["item_id"], command["amount"]
-        status  = False
+        status = False
         if item_id in self._balance_table:
             status = True
             self._balance_table[item_id] -= amount

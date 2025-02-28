@@ -2,10 +2,15 @@ import subprocess
 import sys
 import signal
 import json
+import os
+import glob
 
 
-# run setup_db.py to initialize the database
-# subprocess.Popen([sys.executable, "setup_db.py"]).wait()
+# initialize the database
+# comment out the following block if you want to keep the database
+for file in glob.glob("*.db"):
+    os.remove(file)
+subprocess.Popen([sys.executable, "setup_db.py"]).wait()
 
 with open("config.json") as f:
     config = json.load(f)

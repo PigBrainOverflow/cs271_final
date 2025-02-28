@@ -23,6 +23,10 @@ if __name__ == "__main__":
         for member in cluster["members"]
     }
     router_ep = Endpoint(config["router"]["ip"], config["router"]["port"])
+    item_to_cluster = {
+        tuple(cluster["item_range"]): cluster["index"]
+        for cluster in config["clusters"]
+    }
 
     # setup logging
     import logging
@@ -41,19 +45,34 @@ if __name__ == "__main__":
         clusters=clusters,
         server_eps=server_eps,
         router_ep=router_ep,
+        item_to_cluster=item_to_cluster,
         logger=logger
     )
     client.start()
     # read commands from stdin
     while True:
         try:
-            cluster = int(input("Cluster: "))
-            command = str(input("Command: "))
-            if command == "LockAcquire":
-                item_id = int(input("Item ID: "))
-                response = client.lock_acquire(cluster, item_id)
+            command = str(input(">> "))
+            args = command.split()
+            type = args[0]
+            if type == "deposit":
+                item_id, amount = int(args[1]), int(args[2])
+                response = client.deposit(item_id, amount)
+            elif type == "withdraw":
+                item_id, amount = int(args[1]), int(args[2])
+                response = client.withdraw(item_id, amount)
+            elif type == "balance":
+                item_id = int(args[1])
+                response = client.balance(item_id)
+            elif type == "transfer":
+                from_id, to_id, amount = int(args[1]), int(args[2]), int(args[3])
+                response = client.transfer(from_id, to_id, amount)
+            elif type == "exit":
+                break
             else:
-                print("Invalid command")
+                logger.error("Invalid command")
+                continue
+            logger.info(response)
             print(response)
         except KeyboardInterrupt:
             break
