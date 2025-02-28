@@ -24,6 +24,8 @@ if __name__ == "__main__":
             member["index"]: Endpoint(member["ip"], member["port"])
             for member in cluster["members"] if member["index"] != index
         }
+        item_range = cluster["item_range"]
+        initial_balance = config["initial_balance"]
     except IndexError:
         print("Invalid cluster or member index")
         exit(1)
@@ -47,7 +49,7 @@ if __name__ == "__main__":
         router_ep=router_ep,
         peer_eps=peer_eps,
         logger=logger,
-        lock_table={i: None for i in range(1, 1001)},
-        balance_table={i: 10 for i in range(1, 1001)}
+        lock_table={i: None for i in range(item_range[0], item_range[1])},
+        balance_table={i: initial_balance for i in range(item_range[0], item_range[1])}
     )
     server.start()

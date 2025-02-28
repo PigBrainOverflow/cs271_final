@@ -1,16 +1,21 @@
 import subprocess
 import sys
 import signal
+import json
 
 
 # run setup_db.py to initialize the database
 # subprocess.Popen([sys.executable, "setup_db.py"]).wait()
 
-processes = [
-    subprocess.Popen([sys.executable, "launch_router.py"]),
-    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", "0", "--member", "0"]),
-    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", "0", "--member", "1"]),
-    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", "0", "--member", "2"]),
+with open("config.json") as f:
+    config = json.load(f)
+nservers_per_cluster = [len(cluster["members"]) for cluster in config["clusters"]]
+
+processes = [subprocess.Popen([sys.executable, "launch_router.py"])]
+processes += [
+    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", str(cluster), "--member", str(member)])
+    for cluster in range(len(nservers_per_cluster))
+    for member in range(nservers_per_cluster[cluster])
 ]
 
 print("Launched successfully")

@@ -48,7 +48,7 @@ class Server:
         self._logger = logger
         self._reader = None
         self._writer = None
-        self._queue = asyncio.Queue()
+        self._queue = asyncio.Queue(maxsize=10)
         self._storage = None
         self._policy = None
         self._commit_index = 0
@@ -91,10 +91,10 @@ class Server:
 
     async def async_start(self):
         self._storage = PersistentStorage(f"server{self._index}")
-        # start as a follower
-        self._policy = FollowerPolicy(self)
         try:
             await self._connect_to_router()
+            # start as a follower
+            self._policy = FollowerPolicy(self)
             _, pending = await asyncio.wait(
                 [
                     asyncio.create_task(self._read_from_router()),

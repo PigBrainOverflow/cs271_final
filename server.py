@@ -71,6 +71,60 @@ class Server(raft.Server):
         }
 
 
+    def _handle_balance(self, entry: tuple[int, str, int, int, dict, dict | None]) -> dict:
+        _, ip, port, serial_number, command, _ = entry
+        item_id = command["item_id"]
+        status, value = False, None
+        if item_id in self._balance_table:
+            status = True
+            value = self._balance_table[item_id]
+        return {
+            "ip": ip,
+            "port": port,
+            "serial_number": serial_number,
+            "response": {
+                "status": status,
+                "value": value
+            }
+        }
+
+
+    def _handle_deposit(self, entry: tuple[int, str, int, int, dict, dict | None]) -> dict:
+        _, ip, port, serial_number, command, _ = entry
+        item_id, amount = command["item_id"], command["amount"]
+        status, = False
+        if item_id in self._balance_table:
+            status = True
+            self._balance_table[item_id] += amount
+        return {
+            "ip": ip,
+            "port": port,
+            "serial_number": serial_number,
+            "response": {
+                "status": status
+            }
+        }
+
+
+    def _handle_withdraw(self, entry: tuple[int, str, int, int, dict, dict | None]) -> dict:
+        # NOTE: this withdraw is a primitive assuming sufficient balance
+        # you need to check the balance before calling this function
+        _, ip, port, serial_number, command, _ = entry
+        item_id, amount = command["item_id"], command["amount"]
+        status  = False
+        if item_id in self._balance_table:
+            status = True
+            self._balance_table[item_id] -= amount
+        return {
+            "ip": ip,
+            "port": port,
+            "serial_number": serial_number,
+            "response": {
+                "status": status
+            }
+        }
+
+
     def apply(self) -> list[dict]:
         results = []
         while self._last_applied < self._commit_index:
@@ -82,6 +136,14 @@ class Server(raft.Server):
                 result = self._handle_lock_acquire(entry)
             elif type == "LockRelease":
                 result = self._handle_lock_release(entry)
+            elif type == "Balance":
+                result = self._handle_balance(entry)
+            elif type == "Deposit":
+                result = self._handle_deposit(entry)
+            elif type == "Withdraw":
+                result = self._handle_withdraw(entry)
+            else:
+                raise ValueError(f"Unknown command type: {type}")
             # update log result
             self._storage.set_result(self._last_applied, result["response"])
             results.append(result)

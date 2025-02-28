@@ -9,13 +9,24 @@ class Client(raft.Client):
     # this client blocks until the response is received
     _loop: asyncio.AbstractEventLoop
 
+    _item_to_cluster: dict[tuple[int, int], int]    # item_id range [left, right) -> cluster_id
+
     class UnexpectedResponseError(Exception):
         pass
 
-    def __init__(self, clusters: dict[int, list[int]], server_eps: dict[int, Endpoint], router_ep: Endpoint, logger: logging.Logger = None, loop: asyncio.AbstractEventLoop = None):
+
+    def __init__(self, clusters: dict[int, list[int]], server_eps: dict[int, Endpoint], router_ep: Endpoint, item_to_cluster: dict[tuple[int, int], int], logger: logging.Logger = None, loop: asyncio.AbstractEventLoop = None):
         super().__init__(clusters, server_eps, router_ep, [], logger)
+        self._item_to_cluster = item_to_cluster
         self._serial_number = 0
         self._loop = asyncio.get_event_loop() if loop is None else loop
+
+
+    def get_cluster_by_item(self, item_id: int) -> int | None:
+        for (left, right), cluster in self._item_to_cluster.items():
+            if left <= item_id and item_id < right:
+                return cluster
+        return None
 
 
     def start(self):
@@ -64,7 +75,7 @@ class Client(raft.Client):
                     # if the leader has changed, update the leader
                     self._leaders[cluster] = content["leader_id"]
                 else:
-                    return content
+                    return content["response"]
             except asyncio.TimeoutError:
                 # if the request times out, try again
                 pass
@@ -74,4 +85,94 @@ class Client(raft.Client):
     def lock_acquire(self, cluster: int, item_id: int) -> dict | None:
         # raise asyncio.TimeoutError if the response is not received within the time limit
         # raise Client.UnexpectedResponseError if the serial number of the response is not the same as the request
+        # raise asyncio.TimeoutError if the request times out
         return self._loop.run_until_complete(self.request_cluster(cluster, {"type": "LockAcquire", "item_id": item_id}))
+
+
+    def lock_release(self, cluster: int, item_id: int) -> dict | None:
+        return self._loop.run_until_complete(self.request_cluster(cluster, {"type": "LockRelease", "item_id": item_id}))
+
+
+    def balance(self, cluster: int, item_id: int) -> dict | None:
+        return self._loop.run_until_complete(self.request_cluster(cluster, {"type": "Balance", "item_id": item_id}))
+
+
+    def deposit(self, cluster: int, item_id: int, amount: int) -> dict | None:
+        return self._loop.run_until_complete(self.request_cluster(cluster, {"type": "Deposit", "item_id": item_id, "amount": amount}))
+
+
+    def withdraw(self, cluster: int, item_id: int, amount: int) -> dict | None:
+        return self._loop.run_until_complete(self.request_cluster(cluster, {"type": "Withdraw", "item_id": item_id, "amount": amount}))
+
+
+    def transfer(self, from_id: int, to_id: int, amount: int) -> dict | None:
+        # two-phase commit & two-phase lock
+        # to prevent deadlock, we always acquire locks in the order of item_id
+        # raise Client.UnexpectedResponseError if the serial number of the response is not the same as the request
+        # raise asyncio.TimeoutError if the request times out
+        from_cluster = self.get_cluster_by_item(from_id)
+        to_cluster = self.get_cluster_by_item(to_id)
+        if from_cluster is None or to_cluster is None:
+            return None
+        # acquire locks
+        if from_id < to_id:
+            # acquire from_id first, then check from_id balance
+            response_from_lock = self.lock_acquire(from_cluster, from_id)
+            status, reason = response_from_lock["status"], response_from_lock["reason"]
+            if not status:
+                return {"status": False, "reason": reason}
+            # we assume the balance is always successful
+            response_from_balance = self.balance(from_cluster, from_id)
+            balance = response_from_balance["value"]
+            if balance < amount:
+                self.lock_release(from_cluster, from_id)
+                return {"status": False, "reason": "Insufficient balance"}
+            # acquire to_id
+            response_to_lock = self.lock_acquire(to_cluster, to_id)
+            status, reason = response_to_lock["status"], response_to_lock["reason"]
+            if not status:
+                self.lock_release(from_cluster, from_id)
+                return {"status": False, "reason": reason}
+        else:   # from_id > to_id
+            # acquire to_id first, then acquire from_id
+            response_to_lock = self.lock_acquire(to_cluster, to_id)
+            status, reason = response_to_lock["status"], response_to_lock["reason"]
+            if not status:
+                return {"status": False, "reason": reason}
+            response_from_lock = self.lock_acquire(from_cluster, from_id)
+            status, reason = response_from_lock["status"], response_from_lock["reason"]
+            if not status:
+                self.lock_release(to_cluster, to_id)
+                return {"status": False, "reason": reason}
+            response_from_balance = self.balance(from_cluster, from_id)
+            balance = response_from_balance["value"]
+            if balance < amount:
+                self.lock_release(to_cluster, to_id)
+                self.lock_release(from_cluster, from_id)
+                return {"status": False, "reason": "Insufficient balance"}
+        # deposit to to_id & withdraw from from_id
+        # we assume the deposit and withdraw operations are always successful
+        self.deposit(to_cluster, to_id, amount)
+        self.withdraw(from_cluster, from_id, amount)
+        # release locks
+        # we assume the lock release operations are always successful
+        self.lock_release(from_cluster, from_id)
+        self.lock_release(to_cluster, to_id)
+        return {"status": True, "reason": None}
+
+
+    def balance_safe(self, item_id: int) -> dict | None:
+        cluster = self.get_cluster_by_item(item_id)
+        if cluster is None:
+            return None
+        # acquire lock
+        response_lock = self.lock_acquire(cluster, item_id)
+        status, reason = response_lock["status"], response_lock["reason"]
+        if not status:
+            return {"status": False, "reason": reason}
+        # get balance
+        response_balance = self.balance(cluster, item_id)
+        balance = response_balance["value"]
+        # release lock
+        self.lock_release(cluster, item_id)
+        return {"status": True, "value": balance}

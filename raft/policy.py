@@ -100,6 +100,7 @@ class GeneralPolicy(Policy):
                                 "term": self._server._storage.current_term
                             }
                         })
+                        self._server._logger.info("Sent ElectionTimeout event")
         except asyncio.CancelledError:
             pass
 
