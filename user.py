@@ -133,8 +133,10 @@ class User:
                     client.post(random.choice(self.server_addr) + '/Htransfer', json=transaction.model_dump())
                     for transaction in self.transactions
                 ]
-                await asyncio.gather(*tasks)
+                responses = await asyncio.gather(*tasks)
                 self.transactions.clear()
+                for res in responses:
+                    print(res.json())
                 return None
             else:
                 tasks = [

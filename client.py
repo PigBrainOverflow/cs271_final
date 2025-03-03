@@ -4,7 +4,7 @@ import uvicorn
 import time
 import os
 import logging
-from utils import get_current_time, Account, Transaction
+from utils import get_current_time, Account, Transaction, Endpoint
 import numpy as np
 from pprint import pprint
 from typing import List
@@ -65,11 +65,44 @@ class BankClient:
 
         async with httpx.AsyncClient() as client:
             if x_serveraddr == y_serveraddr: # intra-shard if x,y same server
-                res = await client.post(f"{x_serveraddr}/transfer", json=trans.model_dump())
+                shard = 1
+                res = await client.post(f"{x_serveraddr}/transfer/{shard}", json=trans.model_dump())
+                data = res.json()
+                if not data['status']:
+                    # print(f"{data['reason']}")
+                    return {'reason': data['reason']}
             else: # cross-shard if x,y same server
-                res = await client.post(f"{x_serveraddr}/transfer", json=trans.model_dump())
-                res = await client.post(f"{y_serveraddr}/transfer", json=trans.model_dump())
-        return {'result': 'success'}
+                shard = 0
+                xpacket = Endpoint(id=trans.x, ip=self.ipv4, port=self.port)
+                ypacket = Endpoint(id=trans.y, ip=self.ipv4, port=self.port)
+                res = await client.post(f"{x_serveraddr}/lockacq", json=xpacket.model_dump())
+                data = res.json()
+                if not data['status']:
+                    # print(f"{data['reason']}")
+                    return {'reason': data['reason']}
+                res = await client.post(f"{y_serveraddr}/lockacq", json=ypacket.model_dump())
+                data = res.json()
+                if not data['status']:
+                    # print(f"{data['reason']}")
+                    return {'reason': data['reason']}
+                res = await client.post(f"{x_serveraddr}/transfer/{shard}", json=trans.model_dump())
+                data = res.json()
+                if not data['status']:
+                    await client.post(f"{x_serveraddr}/lockrel", json=xpacket.model_dump())
+                    await client.post(f"{y_serveraddr}/lockrel", json=ypacket.model_dump())
+                    # print(f"{data['reason']}")
+                    return {'reason': data['reason']}
+                res = await client.post(f"{y_serveraddr}/transfer/{shard}", json=trans.model_dump())
+                data = res.json()
+                if not data['status']:
+                    res = await client.post(f"{x_serveraddr}/lockrel", json=xpacket.model_dump())
+                    res = await client.post(f"{y_serveraddr}/lockrel", json=ypacket.model_dump())
+                    # print(f"{data['reason']}")
+                    return {'reason': data['reason']}
+                res = await client.post(f"{x_serveraddr}/lockrel", json=xpacket.model_dump())
+                res = await client.post(f"{y_serveraddr}/lockrel", json=ypacket.model_dump())
+
+        return {'status': True}
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Python client example with port argument.")

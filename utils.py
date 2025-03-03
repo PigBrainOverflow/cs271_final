@@ -21,11 +21,22 @@ def get_current_time(fmt='%Y-%m-%dT%H:%M:%S'):
     """Get current time in specific string format"""
     return datetime.now().strftime(fmt)
 
+class Endpoint(BaseModel):
+    id: int = Field(example=1)
+    ip: str
+    port: int
+
+    def __str__(self):
+        return f"http://{self.ip}:{self.port}"
+
+    def to_json(self):
+        return json.dumps(self.dict(), sort_keys=True)
 
 class Account(BaseModel):
     id: int = Field(example=1)
     balance: float = Field(default=10.0)
     recent_access_time: str = None
+    lock: str | None = None
 
     @validator('recent_access_time', pre=True, always=True)
     def set_create_time_now(cls, v):
