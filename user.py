@@ -1,4 +1,5 @@
 import socket
+import json
 
 from utils import Endpoint
 
@@ -18,8 +19,8 @@ class User:
 
     def connect_to_router(self):
         self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._conn.bind(self._self_ep.ip, self._self_ep.port)
-        self._conn.connect(self._router_ep.ip, self._router_ep.port)
+        self._conn.bind((self._self_ep.ip, self._self_ep.port))
+        self._conn.connect((self._router_ep.ip, self._router_ep.port))
 
 
     def crash(self, targets: list[int]):
@@ -33,7 +34,7 @@ class User:
                 for target in targets
             ]
         }
-        self._conn.send(command)
+        self._conn.send(json.dumps(command).encode() + b"\n")
 
 
     def recover(self, targets: list[int]):
@@ -47,11 +48,11 @@ class User:
                 for target in targets
             ]
         }
-        self._conn.send(command)
+        self._conn.send(json.dumps(command).encode() + b"\n")
 
 
     def terminate(self):
-        self._conn.send({"command": "terminate"})
+        self._conn.send(json.dumps({"command": "terminate"}).encode() + b"\n")
 
 
     def exit(self):

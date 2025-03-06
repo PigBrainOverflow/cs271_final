@@ -172,10 +172,9 @@ class Client(raft.Client):
             return {"status": False, "reason": reason}
         # get balance
         response_balance = self._balance(cluster, item_id)
-        balance = response_balance["value"]
         # release lock
         self._lock_release(cluster, item_id)
-        return {"status": True, "value": balance}
+        return response_balance
 
 
     def deposit(self, item_id: int, amount: int) -> dict | None:
@@ -184,15 +183,14 @@ class Client(raft.Client):
             return None
         # acquire lock
         response_lock = self._lock_acquire(cluster, item_id)
-        status, reason = response_lock["status"], response_lock["reason"]
+        status = response_lock["status"]
         if not status:
-            return {"status": False, "reason": reason}
+            return response_lock
         # deposit
         response_deposit = self._deposit(cluster, item_id, amount)
-        status, reason = response_deposit["status"], response_deposit["reason"]
         # release lock
         self._lock_release(cluster, item_id)
-        return {"status": status, "reason": reason}
+        return response_deposit
 
 
     def withdraw(self, item_id: int, amount: int) -> dict | None:
@@ -201,9 +199,9 @@ class Client(raft.Client):
             return None
         # acquire lock
         response_lock = self._lock_acquire(cluster, item_id)
-        status, reason = response_lock["status"], response_lock["reason"]
+        status = response_lock["status"]
         if not status:
-            return {"status": False, "reason": reason}
+            return response_lock
         # check balance
         response_balance = self._balance(cluster, item_id)
         balance = response_balance["value"]
@@ -212,7 +210,6 @@ class Client(raft.Client):
             return {"status": False, "reason": "Insufficient balance"}
         # withdraw
         response_withdraw = self._withdraw(cluster, item_id, amount)
-        status, reason = response_withdraw["status"], response_withdraw["reason"]
         # release lock
         self._lock_release(cluster, item_id)
-        return {"status": status, "reason": reason}
+        return response_withdraw

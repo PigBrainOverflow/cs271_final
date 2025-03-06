@@ -56,14 +56,14 @@ class Router:
                         break
                     elif command == "crash":
                         try:
-                            targets = [Endpoint(*target) for target in data["targets"]]
+                            targets = [Endpoint(target["ip"], target["port"]) for target in data["targets"]]
                         except (KeyError, TypeError):
                             self._logger.error("Invalid message from user")
                             continue
-                        self._handle_connection(targets)
+                        self._handle_crash(targets)
                     elif command == "recover":
                         try:
-                            targets = [Endpoint(*target) for target in data["targets"]]
+                            targets = [Endpoint(target["ip"], target["port"]) for target in data["targets"]]
                         except (KeyError, TypeError):
                             self._logger.error("Invalid message from user")
                             continue

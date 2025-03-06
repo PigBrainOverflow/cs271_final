@@ -1,3 +1,5 @@
+import time
+
 from client import Client
 from utils import Endpoint
 
@@ -53,6 +55,7 @@ if __name__ == "__main__":
     while True:
         try:
             command = str(input(">> "))
+            start = time.time()
             args = command.split()
             type = args[0]
             if type == "deposit":
@@ -74,6 +77,7 @@ if __name__ == "__main__":
                 continue
             logger.info(response)
             print(response)
+            print(f"Time elapsed: {time.time() - start:.3f}s")
         except KeyboardInterrupt:
             break
         except Exception as e:
