@@ -9,6 +9,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", default="config.json", type=str, help="path to the configuration file")
     parser.add_argument("--cluster", type=int, help="cluster index")
     parser.add_argument("--member", type=int, help="member index")
+    parser.add_argument("--loglevel", default="INFO", type=str, help="log level")
     args = parser.parse_args()
 
     # load configuration
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     # setup logging
     import logging
     logging.basicConfig(
-        level=logging.INFO,
+        level=args.loglevel,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
             # logging.StreamHandler(),

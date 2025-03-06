@@ -64,9 +64,12 @@ class Client(raft.Client):
     async def request_cluster(self, cluster: int, command: dict, time: float = 1.0, retries: int = 3) -> dict | None:
         # send the request to the leader of the cluster
         self._serial_number += 1
+        next_server_index = 0
         for _ in range(retries):
             leader = self._leaders[cluster]
-            leader = self._clusters[cluster][0] if leader is None else leader
+            if leader is None:
+                leader = self._clusters[cluster][next_server_index]
+                next_server_index = (next_server_index + 1) % len(self._clusters[cluster])
             try:
                 content = await self.request_server(leader, command, time)
                 if content is None:
@@ -77,8 +80,8 @@ class Client(raft.Client):
                 else:
                     return content["response"]
             except asyncio.TimeoutError:
-                # if the request times out, try again
-                pass
+                # if the request times out, try again with another server
+                self._leaders[cluster] = None
         raise asyncio.TimeoutError
 
 

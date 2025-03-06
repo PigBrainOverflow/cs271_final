@@ -7,10 +7,12 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config.json", type=str, help="path to the configuration file")
+    parser.add_argument("--loglevel", default="INFO", type=str, help="logging level")
+    args = parser.parse_args()
 
     # load configuration
     import json
-    with open("config.json") as f:
+    with open(args.config) as f:
         config = json.load(f)
     listen_ep = Endpoint(config["router"]["ip"], config["router"]["port"])
     user_ep = Endpoint(config["user"]["ip"], config["user"]["port"])
@@ -18,7 +20,7 @@ if __name__ == "__main__":
     # setup logging
     import logging
     logging.basicConfig(
-        level=logging.INFO,
+        level=args.loglevel,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
             # logging.StreamHandler(),

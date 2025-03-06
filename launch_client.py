@@ -9,6 +9,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config.json", type=str, help="path to the configuration file")
+    parser.add_argument("--loglevel", default="INFO", type=str, help="log level")
     args = parser.parse_args()
 
     # load configuration
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     # setup logging
     import logging
     logging.basicConfig(
-        level=logging.INFO,
+        level=args.loglevel,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
             # logging.StreamHandler(),

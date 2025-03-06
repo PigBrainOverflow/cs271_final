@@ -6,6 +6,9 @@ import os
 import glob
 
 
+LOG_LEVEL = "INFO"
+
+
 # initialize the database
 # comment out the following block if you want to keep the database
 for file in glob.glob("*.db"):
@@ -16,9 +19,9 @@ with open("config.json") as f:
     config = json.load(f)
 nservers_per_cluster = [len(cluster["members"]) for cluster in config["clusters"]]
 
-processes = [subprocess.Popen([sys.executable, "launch_router.py"])]
+processes = [subprocess.Popen([sys.executable, "launch_router.py", "--loglevel", LOG_LEVEL])]
 processes += [
-    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", str(cluster), "--member", str(member)])
+    subprocess.Popen([sys.executable, "launch_server.py", "--cluster", str(cluster), "--member", str(member), "--loglevel", LOG_LEVEL])
     for cluster in range(len(nservers_per_cluster))
     for member in range(nservers_per_cluster[cluster])
 ]
