@@ -52,8 +52,13 @@ class Client(raft.Client):
         # raise asyncio.TimeoutError if the response is not received within the time limit
         # raise Client.UnexpectedResponseError if the serial number of the response is not the same as the request
         await self.send_request(server, command)
+        self._logger.info(f"{command} sent to server {server}")
         # wait for the response
-        response = await asyncio.wait_for(self.receive_response(), timeout=time)
+        try:
+            response = await asyncio.wait_for(self.receive_response(), timeout=time)
+        except asyncio.TimeoutError:
+            raise asyncio.TimeoutError
+        self._logger.info(f"{response} received from server {server}")
         content = response["content"]
         if content["serial_number"] != self._serial_number:
             raise Client.UnexpectedResponseError()
@@ -72,17 +77,21 @@ class Client(raft.Client):
                 next_server_index = (next_server_index + 1) % len(self._clusters[cluster])
             try:
                 content = await self.request_server(leader, command, time)
-                if content is None:
-                    return None
+                self._logger.info(content)
+                # if content is None:
+                #     # if the request times out, try again with another server
+                #     self._leaders[cluster] = None
                 if "leader_id" in content.keys():
                     # if the leader has changed, update the leader
                     self._leaders[cluster] = content["leader_id"]
+                    self._logger.info(f"Leader is updated to {content['leader_id']}")
                 else:
+                    self._leaders[cluster] = leader
                     return content["response"]
             except asyncio.TimeoutError:
                 # if the request times out, try again with another server
                 self._leaders[cluster] = None
-        raise asyncio.TimeoutError
+        return {"status": False, "reason": "Request failed after retries"}
 
 
     def _lock_acquire(self, cluster: int, item_id: int) -> dict | None:

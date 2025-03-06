@@ -382,11 +382,11 @@ class FollowerPolicy(GeneralPolicy):
                     else:
                         self._server._storage.append(index, term, ip, port, serial_number, command_content)
                 # update commit index
-                if len(content["entries"]) > 0: # not a heartbeat
-                    leader_commit, last_new_index = content["leader_commit"], content["entries"][-1]["index"]
-                    if leader_commit > self._server._commit_index:
-                        self._server._commit_index = min(leader_commit, last_new_index)
-                    self.apply()
+                # if len(content["entries"]) > 0: # not a heartbeat
+                leader_commit, last_new_index = content["leader_commit"], len(self._server._storage)
+                if leader_commit > self._server._commit_index:
+                    self._server._commit_index = min(leader_commit, last_new_index)
+                self.apply()
         # send response
         response = {
             "to": receive_from,
