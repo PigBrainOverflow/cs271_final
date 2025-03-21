@@ -1,6 +1,7 @@
 import dataclasses
 import sqlite3
 import json
+from colorama import Fore, Style
 
 
 @dataclasses.dataclass(frozen=True)
@@ -44,7 +45,7 @@ class PersistentStorage:
 
     def __init__(self, db_name: str):
         self._db_conn = sqlite3.connect(db_name + ".db")
-
+    
 
     def create_tables(self):
         self._db_conn.execute(self.CREATE_CURRENT_TERM)
@@ -57,7 +58,7 @@ class PersistentStorage:
         self._db_conn.execute("INSERT OR IGNORE INTO current_term (id, value) VALUES (0, 0)")
         self._db_conn.execute("INSERT OR IGNORE INTO voted_for (id, value) VALUES (0, NULL)")
         self._db_conn.commit()
-
+        
 
     @property
     def current_term(self) -> int:
@@ -123,3 +124,4 @@ class PersistentStorage:
         cursor = self._db_conn.execute("SELECT result FROM log WHERE client_ip = ? AND client_port = ? AND serial_number = ?", (ip, port, serial_number))
         row = cursor.fetchone()
         return row is not None, None if row is None else json.loads(row[0])
+
