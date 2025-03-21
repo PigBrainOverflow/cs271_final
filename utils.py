@@ -1,69 +1,127 @@
-import socket
-from datetime import datetime
-from pydantic import BaseModel, Field
-from pydantic import validator
+import dataclasses
+import sqlite3
 import json
 from colorama import Fore, Style
 
-def get_host_ip():
-    """Get host IP address"""
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
 
-    return ip
-
-
-def get_current_time(fmt='%Y-%m-%dT%H:%M:%S'):
-    """Get current time in specific string format"""
-    return datetime.now().strftime(fmt)
-
-class Endpoint(BaseModel):
-    id: int = Field(example=1)
+@dataclasses.dataclass(frozen=True)
+class Endpoint:
     ip: str
     port: int
 
-    def __str__(self):
-        return f"http://{self.ip}:{self.port}"
+    def to_dict(self) -> dict:
+        return dataclasses.asdict(self)
 
-    def to_json(self):
-        return json.dumps(self.dict(), sort_keys=True)
 
-class Account(BaseModel):
-    id: int = Field(example=1)
-    balance: float = Field(default=10.0)
-    recent_access_time: str = None
-    lock: str | None = None
+class PersistentStorage:
+    """
+    NOTE: Log index starts from 1.
+    """
 
-    @validator('recent_access_time', pre=True, always=True)
-    def set_create_time_now(cls, v):
-        return v or get_current_time()
+    _db_conn: sqlite3.Connection
+    CREATE_CURRENT_TERM = """
+        CREATE TABLE IF NOT EXISTS current_term (
+            id INTEGER PRIMARY KEY CHECK (id = 0),
+            value INTEGER NOT NULL
+        );
+    """
+    CREATE_VOTED_FOR = """
+        CREATE TABLE IF NOT EXISTS voted_for (
+            id INTEGER PRIMARY KEY CHECK (id = 0),
+            value INTEGER
+        );
+    """
+    CREATE_LOG = """
+        CREATE TABLE IF NOT EXISTS log (
+            index_ INTEGER PRIMARY KEY,
+            term INTEGER,
+            client_ip VARCHAR(32),
+            client_port INTEGER,
+            serial_number INTEGER,
+            command JSON,
+            result JSON DEFAULT NULL
+        );
+    """
 
-    def __str__(self):
-        table_header = f"| {'Client':^7} | {'BAL':^7} | {'Timestamp':^30} |"
-        table_divider = "-" * len(table_header)
-        table_row = f"| {self.id:^7} | {self.balance:^7.2f} | {self.recent_access_time:^30} |"
-        return f"{table_divider}\n{table_header}\n{table_divider}\n{table_row}\n{table_divider}"
+    def __init__(self, db_name: str):
+        self._db_conn = sqlite3.connect(db_name + ".db")
+    
 
-    def to_json(self):
-        return json.dumps(self.dict(), sort_keys=True)
+    def create_tables(self):
+        self._db_conn.execute(self.CREATE_CURRENT_TERM)
+        self._db_conn.execute(self.CREATE_VOTED_FOR)
+        self._db_conn.execute(self.CREATE_LOG)
+        self._db_conn.commit()
 
-class Transaction(BaseModel):
-    x: int = Field(example=1)
-    y: int = Field(example=1)
-    amt: float = Field(example=1.0)
 
-    def to_json(self):
-        return json.dumps(self.__dict__, sort_keys=True)
+    def init_tables(self):
+        self._db_conn.execute("INSERT OR IGNORE INTO current_term (id, value) VALUES (0, 0)")
+        self._db_conn.execute("INSERT OR IGNORE INTO voted_for (id, value) VALUES (0, NULL)")
+        self._db_conn.commit()
+        
 
-    def to_tuple(self):
-        return self.x, self.y, self.amt
+    @property
+    def current_term(self) -> int:
+        cursor = self._db_conn.execute("SELECT value FROM current_term WHERE id = 0")
+        return cursor.fetchone()[0]
 
-class TxnLog(Transaction):
-    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
 
-    def __str__(self):
-        return f"{Fore.YELLOW}<<<{self.timestamp}>>>{Style.RESET_ALL} Transaction from {Fore.GREEN}{str(self.x)}{Style.RESET_ALL} to {Fore.GREEN}{str(self.y)}{Style.RESET_ALL} of amount {Fore.GREEN}{str(self.amt)}{Style.RESET_ALL}"
+    @current_term.setter
+    def current_term(self, value: int):
+        self._db_conn.execute("UPDATE current_term SET value = ? WHERE id = 0", (value,))
+        self._db_conn.commit()
+
+
+    @property
+    def voted_for(self) -> int | None:
+        cursor = self._db_conn.execute("SELECT value FROM voted_for WHERE id = 0")
+        return cursor.fetchone()[0]
+
+
+    @voted_for.setter
+    def voted_for(self, value: int):
+        self._db_conn.execute("UPDATE voted_for SET value = ? WHERE id = 0", (value,))
+        self._db_conn.commit()
+
+
+    def append(self, index: int, term: int, client_ip: str, client_port: int, serial_number: int, command: dict, result: dict | None = None):
+        self._db_conn.execute(
+            "INSERT INTO log (index_, term, client_ip, client_port, serial_number, command, result) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (index, term, client_ip, client_port, serial_number, json.dumps(command), None if result is None else json.dumps(result)))
+        self._db_conn.commit()
+
+
+    def __getitem__(self, index: int) -> tuple[int, str, int, int, dict, dict | None] | None:
+        # return (term, client_ip, client_port, serial_number, command, result)
+        cursor = self._db_conn.execute("SELECT term, client_ip, client_port, serial_number, command, result FROM log WHERE index_ = ?", (index,))
+        row = cursor.fetchone()
+        return None if row is None else (row[0], row[1], row[2], row[3], json.loads(row[4]), None if row[5] is None else json.loads(row[5]))
+
+
+    def __len__(self) -> int:
+        cursor = self._db_conn.execute("SELECT COUNT(*) FROM log")
+        return cursor.fetchone()[0]
+
+
+    def remove_back(self, index: int):
+        # remove all logs with index >= index
+        self._db_conn.execute("DELETE FROM log WHERE index_ >= ?", (index,))
+        self._db_conn.commit()
+
+
+    def set_result(self, index: int, result: dict):
+        self._db_conn.execute("UPDATE log SET result = ? WHERE index_ = ?", (json.dumps(result), index))
+        self._db_conn.commit()
+
+
+    def get_result(self, index: int) -> dict | None:
+        cursor = self._db_conn.execute("SELECT result FROM log WHERE index_ = ?", (index,))
+        row = cursor.fetchone()
+        return None if row is None else json.loads(row[0])
+
+
+    def get_result_by_serial_number(self, ip: str, port: int, serial_number: int) -> tuple[bool, dict | None]:
+        cursor = self._db_conn.execute("SELECT result FROM log WHERE client_ip = ? AND client_port = ? AND serial_number = ?", (ip, port, serial_number))
+        row = cursor.fetchone()
+        return row is not None, None if row is None else json.loads(row[0])
+

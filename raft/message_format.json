@@ -1,0 +1,76 @@
+[
+    {
+        "type": "ElectionTimeout",
+        "term": 1
+    },
+    {
+        "type": "AppendEntriesRPC",
+        "term": 1,
+        "leader_id": 1,
+        "prev_log_index": 1,
+        "prev_log_term": 1,
+        "entries": [
+            {
+                "term": 1,
+                "index": 1,
+                "command": {
+                    "ip": "127.0.0.1",
+                    "port": 8080,
+                    "serial_number": 1,
+                    "content": {
+                        "type": "LockAcquire",
+                        "item_id": 1
+                    }
+                }
+            }
+        ],
+        "leader_commit": 1
+    },
+    {
+        "type": "AppendEntriesResponse",
+        "term": 1,
+        "success": true,
+        "last_index": 1,
+        "follower_id": 1
+    },
+    {
+        "type": "RequestVoteRPC",
+        "term": 1,
+        "candidate_id": 1,
+        "last_log_index": 1,
+        "last_log_term": 1
+    },
+    {
+        "type": "RequestVoteResponse",
+        "term": 1,
+        "vote_granted": true,
+        "voter_id": 1
+    },
+    {
+        "type": "ClientRequest",
+        "serial_number": 1,
+        "command": {
+            "type": "LockAcquire",
+            "item_id": 1
+        }
+    },
+    {
+        "type": "ClientResponse",
+        "serial_number": 1,
+        "leader_id": 1
+    },
+    {
+        "type": "ClientResponse",
+        "serial_number": 1,
+        "response": {}
+    },
+    {
+        "type": "Heartbeat"
+    },
+    {
+        "ip": "127.0.0.1",
+        "port": 8080,
+        "serial_number": 1,
+        "response": {}
+    }
+]

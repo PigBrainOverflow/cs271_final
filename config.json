@@ -1,4 +1,76 @@
 {
-    "HOST_IPv4": "localhost",
-    "HOST_PORT": 8000
+    "router": {
+        "ip": "127.0.0.1",
+        "port": 8080
+    },
+    "user": {
+        "ip": "127.0.0.1",
+        "port": 8081
+    },
+    "clusters": [
+        {
+            "index": 1,
+            "item_range": [1, 1001],
+            "members": [
+                {
+                    "index": 1,
+                    "ip": "127.0.0.1",
+                    "port": 9000
+                },
+                {
+                    "index": 2,
+                    "ip": "127.0.0.1",
+                    "port": 9001
+                },
+                {
+                    "index": 3,
+                    "ip": "127.0.0.1",
+                    "port": 9002
+                }
+            ]
+        },
+        {
+            "index": 2,
+            "item_range": [1001, 2001],
+            "members": [
+                {
+                    "index": 4,
+                    "ip": "127.0.0.1",
+                    "port": 9003
+                },
+                {
+                    "index": 5,
+                    "ip": "127.0.0.1",
+                    "port": 9004
+                },
+                {
+                    "index": 6,
+                    "ip": "127.0.0.1",
+                    "port": 9005
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "item_range": [2001, 3001],
+            "members": [
+                {
+                    "index": 7,
+                    "ip": "127.0.0.1",
+                    "port": 9006
+                },
+                {
+                    "index": 8,
+                    "ip": "127.0.0.1",
+                    "port": 9007
+                },
+                {
+                    "index": 9,
+                    "ip": "127.0.0.1",
+                    "port": 9008
+                }
+            ]
+        }
+    ],
+    "initial_balance": 10
 }
